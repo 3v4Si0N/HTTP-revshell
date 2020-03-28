@@ -2,7 +2,7 @@
 
 ##  server.py - server
 
-![Alt text](images/revshell.png "Server")
+![Alt text](images/revshell.jpg "Server")
 
 On your server:
 ```
