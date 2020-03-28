@@ -14,7 +14,7 @@ On your server:
         python3 server.py --ssl IP PORT
 ```
 
-## clientHTTP_shell.ps1 - client
+## Invoke-WebRev.ps1 - client
 
 On your client:
 ```
