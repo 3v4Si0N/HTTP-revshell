@@ -27,5 +27,6 @@ Reverse Shell with encryption:
 ```
 
 # Future features
+    - Proxy Aware
     - Upload function
     - Download function
