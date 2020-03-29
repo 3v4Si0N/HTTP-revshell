@@ -29,5 +29,4 @@ Reverse Shell with encryption:
 # Future features
     - Proxy Aware
     - Autocomplete
-    - Upload function
     - Download function
