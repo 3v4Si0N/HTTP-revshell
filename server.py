@@ -9,6 +9,7 @@ import readline
 import ssl
 import argparse
 
+readline.parse_and_bind("tab: complete")
 
 """
     For HTTPS Server
