@@ -69,7 +69,7 @@ class myHandler(BaseHTTPRequestHandler):
             input(colored("[!] New Connection, please press ENTER!",'red'))
             command = "pwd"
         else:
-            command = input("PS {}>> ".format(pwd)) + " ;pwd"
+            command = input("PS {}> ".format(pwd)) + " ;pwd"
         return command
 
     def sendCommand(self, command, html):
