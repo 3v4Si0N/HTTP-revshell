@@ -38,6 +38,7 @@ function Invoke-WebRev{
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials;
     $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12';
     [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
+    [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
 
     while ($true)
     {
