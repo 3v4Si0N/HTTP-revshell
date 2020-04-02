@@ -34,5 +34,7 @@ Upload
     - Upload Function
 
 # Future features
-    - Autocomplete
+    - AMSI bypass
     - Download function
+    - Autocomplete
+    
