@@ -30,7 +30,7 @@ Upload
 
 ```
 Download
-    Usage: upload C:\src\path\file /dst/path/file
+    Usage: download C:\src\path\file /dst/path/file
 ```
 
 # Features
