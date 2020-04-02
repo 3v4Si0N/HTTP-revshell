@@ -28,13 +28,18 @@ Upload
     Usage: upload /src/path/file C:\dest\path\file
 ```
 
+```
+Download
+    Usage: upload C:\src\path\file /dst/path/file
+```
+
 # Features
     - SSL
     - Proxy Aware
     - Upload Function
+    - Download function
 
 # Future features
     - AMSI bypass
-    - Download function
     - Autocomplete
     
