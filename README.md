@@ -39,9 +39,9 @@ Download
     - Upload Function
     - Download Function
     - Error Control
+    - AMSI bypass
 
 # Future features
-    - AMSI bypass
     - Autocomplete
     - Multiple sessions
     
