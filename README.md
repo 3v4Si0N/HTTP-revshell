@@ -42,4 +42,5 @@ Download
 # Future features
     - AMSI bypass
     - Autocomplete
+    - Multiple sessions
     
