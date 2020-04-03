@@ -37,7 +37,8 @@ Download
     - SSL
     - Proxy Aware
     - Upload Function
-    - Download function
+    - Download Function
+    - Error Control
 
 # Future features
     - AMSI bypass
