@@ -40,8 +40,8 @@ Download
     - Download Function
     - Error Control
     - AMSI bypass
+    - Multiple sessions
 
 # Future features
     - Autocomplete
-    - Multiple sessions
     
