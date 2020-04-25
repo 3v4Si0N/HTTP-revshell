@@ -1,4 +1,5 @@
 # Powershell HTTP/S Reverse Shell
+HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol using "Invoke-webrev.ps1" as client and "server.py" as server.
 
 ##  server.py - server
 
