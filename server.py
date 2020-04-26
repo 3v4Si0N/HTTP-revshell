@@ -70,7 +70,6 @@ class myHandler(BaseHTTPRequestHandler):
                 
                 result = urllib.parse.unquote(data["result"])
                 result = (base64.b64decode(data["result"])).decode('utf-8')
-                result = result.replace('\n', '')
             except:
                 pass
         else:
