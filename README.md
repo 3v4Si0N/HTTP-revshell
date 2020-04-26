@@ -27,9 +27,8 @@ There is a menu with three basic commands: sessions, interact and exit
      - sessions --> show currently active sessions
      - interact --> interacts with a session (Example: interact <session_id>)
      - exit --> close the application
-
-**IMPORTANT**: To change the session press CTRL + d to exit the current session without closing it.
 ```
+**IMPORTANT**: To change the session press *CTRL+d* to exit the current session without closing it.
 
 ## Invoke-WebRev.ps1 - client
 
