@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import base64
 from termcolor import colored
@@ -9,17 +8,11 @@ import readline
 import ssl
 import argparse
 import json
+from datetime import datetime, date
+from OpenSSL import crypto, SSL
+from os import path
 
 readline.parse_and_bind("tab: complete")
-
-"""
-    For HTTPS Server
-        Create certificate using the commands:
-                - openssl genrsa -out private.pem 2048
-                - openssl req -new -x509 -key private.pem -out cacert.pem -days 9999
-"""
-
-
 
 class myHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
