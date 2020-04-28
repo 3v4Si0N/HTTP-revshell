@@ -8,6 +8,8 @@ import readline
 import ssl
 import argparse
 import json
+from pynput.keyboard import Key, Controller
+import signal
 from datetime import datetime, date
 from OpenSSL import crypto, SSL
 from os import path
