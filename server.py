@@ -132,13 +132,7 @@ class myHandler(BaseHTTPRequestHandler):
                         
                     content = functions.upload(filename)
                     html = content.decode('utf-8')
-                except AttributeError:
-                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                    print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-                except IndexError:
-                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                    print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-                except UnboundLocalError:
+                except (AttributeError, IndexError, UnboundLocalError) as e:
                     print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                     print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
             elif (command_list[0] == "download"):
