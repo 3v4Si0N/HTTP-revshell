@@ -257,48 +257,72 @@ class Certificate():
             exist = True
         return exist
 
+class Readline_functions():
+    def completer(self, text, state):
+        main_commands = ["help", "exit", "sessions", "interact"]
+        options = [i for i in main_commands if i.startswith(text)]
+        if state < len(options):
+            return options[state]
+        else:
+            return None
+
+    def main_help_banner(self):
+        print("\n")
+        print("Available commands to use :\n")
+        print("+++++++++")
+        print("help  \t\t\t\tShow this help menu")
+        print("sessions  \t\t\tList all active sessions")
+        print("interact {session_id}  \t\tInteract with a session. Example: interact 1")
+        print("exit \t\t\t\tClose the server")
+        print("\n")
+
+
+class Menu():
+    def printSessionTable(self):
+        t = PrettyTable(["Session ID", "IP", "Username", "Hostname"])
+        for client in CLIENT_DICT.keys():
+            t.add_row([CLIENT_DICT[client]["session"], client, CLIENT_DICT[client]["username"], CLIENT_DICT[client]["hostname"]])
+        print(colored(t.get_string(title="Sessions"), "green"))
+
+    def construct_menu(self, menu, server):
+        if menu[0] == "sessions":
+            #server.handle_request()
+            self.printSessionTable()
+
+        elif menu[0] == "exit":
+            server.server_close()
+            exit(0)
+
+        elif menu[0] == "help":
+            rf = Readline_functions()
+            rf.main_help_banner()
+        
+        elif menu[0] == "interact":
+            if len(CLIENT_DICT) == 0:
+                print(colored("[!] Sorry, there are no clients!", "red"))
+            else:
+                try:
+                    global CURRENT_CLIENT
+                    for client in list(CLIENT_DICT.keys()):
+                        if CLIENT_DICT[client]["session"] == int(menu[1]):
+                            CURRENT_CLIENT = client
+                    while True:
+                        global KEY_PULSED
+                        if KEY_PULSED:
+                            KEY_PULSED = False
+                            break
+                        request, client_address = server.get_request()
+
+                        if CURRENT_CLIENT == client_address[0]:
+                            if server.verify_request(request,client_address):
+                                server.process_request(request,client_address)
+                        else:
+                            server.finish_request(request, client_address)
+                except ValueError:
+                    print (colored("[!] Session number {} doesn't exist".format(menu[1]), "red"))
 
 def handler(signum, frame):
     pass
-
-def printSessionTable():
-    t = PrettyTable(["Session ID", "IP", "Username", "Hostname"])
-    for client in CLIENT_DICT.keys():
-        t.add_row([CLIENT_DICT[client]["session"], client, CLIENT_DICT[client]["username"], CLIENT_DICT[client]["hostname"]])
-    print(colored(t.get_string(title="Sessions"), "green"))
-
-def construct_menu(menu, server):
-    if menu[0] == "sessions":
-        #server.handle_request()
-        printSessionTable()
-
-    if menu[0] == "exit":
-        server.server_close()
-        exit(0)
-    
-    if menu[0] == "interact":
-        if len(CLIENT_DICT) == 0:
-            print(colored("[!] Sorry, there are no clients!", "red"))
-        else:
-            try:
-                global CURRENT_CLIENT
-                for client in list(CLIENT_DICT.keys()):
-                    if CLIENT_DICT[client]["session"] == int(menu[1]):
-                        CURRENT_CLIENT = client
-                while True:
-                    global KEY_PULSED
-                    if KEY_PULSED:
-                        KEY_PULSED = False
-                        break
-                    request, client_address = server.get_request()
-
-                    if CURRENT_CLIENT == client_address[0]:
-                        if server.verify_request(request,client_address):
-                            server.process_request(request,client_address)
-                    else:
-                        server.finish_request(request, client_address)
-            except ValueError:
-                print (colored("[!] Session number {} doesn't exist".format(menu[1]), "red"))
 
 if __name__ == "__main__":
     banner = """
@@ -331,10 +355,15 @@ if __name__ == "__main__":
             server.socket = ssl.wrap_socket (server.socket, certfile='certificate/cacert.pem', keyfile='certificate/private.pem', server_side=True)
 
         server.handle_request()
+        rf = Readline_functions()
+        menu = Menu()
         while True:
-            menu = input(colored("\nHTTP-revshell> ", "yellow")).split(" ")
-            construct_menu(menu, server)
-            
+            readline.set_completer(rf.completer)
+            readline.parse_and_bind("tab: complete")
+
+            menu_command = input(colored("\nHTTP-revshell> ", "yellow")).split(" ")
+            menu.construct_menu(menu_command, server)
+
     except KeyboardInterrupt:
         print (' received, shutting down the web server')
         server.server_close()
