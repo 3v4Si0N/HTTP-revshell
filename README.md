@@ -75,10 +75,11 @@ Features
     - Download Function
     - Error Control
     - AMSI bypass
-    - Multiple sessions (only server-multisession.py)
+    - Multiple sessions [only server-multisession.py]
+    - Autocomplete PowerShell functions (optional) [only server.py]
 
 TODO
 ------------
 
-    - Autocomplete
+    - ??
     
