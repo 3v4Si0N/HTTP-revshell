@@ -262,8 +262,9 @@ def main():
             server.socket = ssl.wrap_socket (server.socket, certfile='certificate/cacert.pem', keyfile='certificate/private.pem', server_side=True)
 
         if (args.autocomplete):
-           AUTOCOMPLETE = True
+            AUTOCOMPLETE = True
         else:
+            readline.set_completer_delims(" ")
             readline.parse_and_bind("tab: complete")
 
         server.serve_forever()
