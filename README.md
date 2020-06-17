@@ -31,17 +31,18 @@ server.py - server unisession
 
 Server usage:
 ```
-usage: server.py [-h] [--ssl] host port
+usage: server.py [-h] [--ssl] [--autocomplete] host port
 
 Process some integers.
 
 positional arguments:
-  host        Listen Host
-  port        Listen Port
+  host            Listen Host
+  port            Listen Port
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --ssl       Send traffic over ssl
+  -h, --help      show this help message and exit
+  --ssl           Send traffic over ssl
+  --autocomplete  Autocomplete powershell functions
 ```
 
 Invoke-WebRev.ps1 - client
