@@ -3,7 +3,7 @@ Powershell HTTP/S Reverse Shell
 
 HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol.
 
-![Alt text](images/revshell.jpg "Server")
+![Alt text](images/logo.jpg "Logo")
 
 Installation
 ------------
