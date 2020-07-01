@@ -49,7 +49,7 @@ class myHandler(BaseHTTPRequestHandler):
 
     def parseResult(self):
         test_data = self.rfile.read(int(self.headers['Content-Length']))
-        data = json.loads(test_data.decode('uft-8'))
+        data = json.loads(test_data.decode('utf-8'))
         parser_type = data["type"]
         result = ""
         color = "white"
