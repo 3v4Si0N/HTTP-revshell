@@ -1,7 +1,7 @@
 # Powershell HTTP/S Reverse Shell
 
 ## Description
-HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol. HTTP-revshell makes use of a covert channel to gain control over the victim machine through web requests and thus evade solutions such as IDS, IPS and AV.
+HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol. It use a covert channel to gain control over the victim machine through web requests and thus evade solutions such as IDS, IPS and AV.
 
 <p align="center"><img width=400 alt="HTTP-revshell" src="https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/master/images/logo.png"></p>
 
