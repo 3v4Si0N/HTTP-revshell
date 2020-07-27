@@ -65,7 +65,7 @@ There is a menu with three basic commands: sessions, interact and exit
 
 ## Credits
  - [JoelGMSec] for his awesome Revshell-Generator.ps1. Twitter: [@JoelGMSec]
- - [dev2null] for report the first bug. Twitter: [@dev2null]
+ - [dev-2null] for report the first bug. Twitter: [@dev2null]
 
 ## Disclaimer & License
 This script is licensed under LGPLv3+. Direct link to [License](https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/master/LICENSE).
@@ -73,3 +73,11 @@ This script is licensed under LGPLv3+. Direct link to [License](https://raw.gith
 HTTP-revshell should be used for authorized penetration testing and/or nonprofit educational purposes only. 
 Any misuse of this software will not be the responsibility of the author or of any other collaborator. 
 Use it at your own servers and/or with the server owner's permission.
+
+<!-- Twitter URLs -->
+[@JoelGMSec]: https://twitter.com/JoelGMSec
+[@dev2null]: https://twitter.com/dev2nulI
+
+<!-- Github URLs -->
+[JoelGMSec]: https://github.com/JoelGMSec
+[dev-2null]: https://github.com/dev-2null
