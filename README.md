@@ -1,6 +1,7 @@
 # Powershell HTTP/S Reverse Shell
 
-## Description
+[![Category-tool]]() [![Powershell]]() [![Python]]() [![License]]()
+
 HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool provides a reverse connection through the http/s protocol. It use a covert channel to gain control over the victim machine through web requests and thus evade solutions such as IDS, IPS and AV.
 
 <p align="center"><img width=400 alt="HTTP-revshell" src="https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/master/images/logo.png"></p>
@@ -81,3 +82,9 @@ Use it at your own servers and/or with the server owner's permission.
 <!-- Github URLs -->
 [JoelGMSec]: https://github.com/JoelGMSec
 [dev-2null]: https://github.com/dev-2null
+
+<!-- Badge URLs -->
+[License]: https://img.shields.io/badge/License-LGPL%20v3%2B-blue.svg?style=flat-square&colorA=273134&colorB=006bbd "LGPL v3+"
+[Category-tool]: https://img.shields.io/badge/Category-Post%20Exploitation-E5A505?style=flat-square&colorA=273134
+[Powershell]: https://img.shields.io/badge/Powershell-3.0%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff0000
+[Python]: https://img.shields.io/badge/Python-3%2B-blue.svg?style=flat-square&colorA=273133&colorB=ff6f00
