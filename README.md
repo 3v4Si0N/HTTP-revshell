@@ -51,8 +51,9 @@ There is a menu with three basic commands: sessions, interact and exit
 ## Features
  - SSL
  - Proxy Aware
- - Upload Function
- - Download Function
+ - Upload files
+ - Download files
+ - Load powershell scripts through the server
  - Error Control
  - AMSI bypass
  - Multiple sessions [only server-multisession.py]
@@ -60,9 +61,26 @@ There is a menu with three basic commands: sessions, interact and exit
     
 ## Extra functions usage
 ### Upload
- - upload /src/path/file C:\dest\path\file
+This function allow you to upload any file to the victim machine.
+
+Usage:
+```
+upload /src/path/file C:\dest\path\file
+```
 ### Download
- - download C:\src\path\file /dst/path/file
+This function allow you to download a file to the attacker machine.
+
+Usage:
+```
+download C:\src\path\file /dst/path/file
+```
+ ### Loadps1
+This function allows you to load from powershell scripts without having to write to the victim's disk, reading the file through legitimate HTTP traffic.
+
+Usage:
+```
+loadps1 /path/to/the/local/server/PowershellScript.ps1
+```
 
 ## Help Revshell-Generator.ps1 (Automatic Payload Generator)
 This script allows you to create an executable file with the payload necessary to use **HTTP-revshell**, you just need to follow the instructions on the screen to generate it. There are 6 predefined templates and a customizable one, with the data that you like.
