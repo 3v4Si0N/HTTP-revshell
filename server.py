@@ -1,16 +1,9 @@
 #!/usr/bin/python3
+import certificate, modulescontroller
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import base64
+import base64, urllib.parse, time, readline, ssl, argparse, json
 from termcolor import colored
-import urllib.parse
-import time
-import readline
-import ssl
-import argparse
-import json
-from datetime import datetime, date
-from OpenSSL import crypto, SSL
-from os import path
+from os import listdir, sep, path
 
 
 global AUTOCOMPLETE
@@ -33,9 +26,14 @@ class myHandler(BaseHTTPRequestHandler):
         pwd = self.getPwd(json_response)
 
         if (self.isDownloadFunctCalled(json_response)):
-            filename, file_content, output = self.parseDownload(json_response)
-            functions = Functions()
-            functions.download(filename, file_content, output)
+            filename, content, output = self.parseDownload(json_response)
+            try:
+                with open(filename, mode='wb') as file: # b is importante -> binary
+                    content = base64.b64decode(content)
+                    file.write(content)
+                    print(colored(output, "green"))
+            except:
+                print (colored("\r\n[!] Error: Writing file!", "red"))
         else:
             if json_response["result"] != json_response["pwd"] and json_response["type"] != "4UT0C0MPL3T3":
                 self.printResult(result, color)
@@ -59,14 +57,14 @@ class myHandler(BaseHTTPRequestHandler):
             try:
                 if (parser_type == "C0MM4ND"):
                     color = "white"
-                elif (parser_type == "UPL04D" or parser_type == "D0WNL04D" or parser_type == "L04DPS1"):
-                    color = "green"
                 elif (parser_type == "3RR0R"):
                     color = "red"
+                else:
+                    color = "green"
 
                 if (parser_type == "4UT0C0MPL3T3"):
                     PSH_FUNCTIONS = (base64.b64decode(data["result"])).decode('utf-8').split()
-                    readline.set_completer(completer)
+                    readline.set_completer(self.completer)
                     readline.set_completer_delims(" ")
                     readline.parse_and_bind("tab: complete")
 
@@ -134,114 +132,37 @@ class myHandler(BaseHTTPRequestHandler):
     def sendCommand(self, command, html, content=""):
         if (command != ""):
             command_list = command.split(" ")
-            if (command_list[0] == "upload"):
-                functions = Functions()
-                try:
-                    if (len(command_list) == 3 or command[-1] == '"'):
-                        if '"' in command_list[1]:
-                            filename = command.split('"')[1]
-                        else:
-                            filename = command_list[1]
-                    elif ('"' in command_list[1]):
-                        filename = command.split('"')[1]
-
-                    html = functions.upload(filename)
-                except (AttributeError, IndexError, UnboundLocalError) as e:
-                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                    print (colored("\t- Usage: upload /src/path/file C:\\dest\\path\\file\n", "red"))
-
-            elif (command_list[0] == "download"):
-                try:
-                    download = command_list[0]
-                    srcFile = command_list[1]
-                    dstFile = command_list[2]
-                except IndexError:
-                    print (colored("\r\n[!] Source and/or destination file not found!", "red"))
-                    print (colored("\t- Usage: download C:\\src\\path\\file /dst/path/file\n", "red"))
-
-            elif (command_list[0] == "loadps1"):
-                functions = Functions()
-                try:
-                    filename = command_list[1]
-                    html = functions.loadps1(filename)
-                except IndexError:
-                    print (colored("\r\n[!] file not found!", "red"))
-                    print (colored("\t- Usage: load /path/to/file/to/load.ps1\n", "red"))
+            if command_list[0] in MODULES.keys():
+                html = modulescontroller.ModulesController(MODULES,command_list, command)
+                html = str(html)
 
             CMD = base64.b64encode(command.encode())
             self.send_header('Authorization',CMD.decode('utf-8'))
             self.end_headers()
             self.wfile.write(html.encode())
+            
+    def completer(self,text, state):
+        options = [i for i in PSH_FUNCTIONS if i.startswith(text)]
+        if state < len(options):
+            return options[state]
+        else:
+            return None
 
 
-class Functions():
-    def upload(self, filename):
-        try:
-            with open(filename, mode='rb') as f: # b is important -> binary
-                return base64.b64encode(f.read()).decode('utf-8')
-        except FileNotFoundError:
-            print (colored("\r\n[!] Source file not found!", "red"))
 
-    def download(self, filename, content, output):
-        try:
-            with open(filename, mode='wb') as file: # b is importante -> binary
-                content = base64.b64decode(content)
-                file.write(content)
-                print(colored(output, "green"))
-        except:
-            print (colored("\r\n[!] Error: Writing file!", "red"))
-    def loadps1(self, filename):
-        try:
-            with open(filename, "rb") as f:
-                return base64.b64encode(f.read()).decode()[::-1]
-        except FileNotFoundError:
-            print (colored("\r\n[!] File not found!", "red"))
-
-class Certificate():
-    def checkCertificateExpiration(self):
-        expired = False
-
-        cert = crypto.load_certificate(crypto.FILETYPE_PEM, open('certificate/cacert.pem', 'rt').read())
-        cert_date = datetime.strptime(cert.get_notAfter().decode('utf-8'),"%Y%m%d%H%M%SZ")
-        today = date.today()
-        current_date = today.strftime("%Y-%m-%d")
-
-        if str(current_date) == str(cert_date).split(" ")[0]:
-            expired = True
-        return expired
-
-    def genCertificate(self, KEY_FILE="certificate/private.pem", CERT_FILE="certificate/cacert.pem"):
-        k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 4096)
-
-        cert = crypto.X509()
-        cert.get_subject().C = "UK"
-        cert.get_subject().ST = "London"
-        cert.get_subject().L = "London"
-        cert.get_subject().O = "Development"
-        cert.get_subject().CN = "www.google.com"
-        cert.gmtime_adj_notBefore(0)
-        cert.gmtime_adj_notAfter(31557600)
-        cert.set_issuer(cert.get_subject())
-        cert.set_pubkey(k)
-        cert.sign(k, 'sha512')
-        with open(CERT_FILE, "wt") as f:
-            f.write(crypto.dump_certificate(crypto.FILETYPE_PEM, cert).decode("utf-8"))
-        with open(KEY_FILE, "wt") as f:
-            f.write(crypto.dump_privatekey(crypto.FILETYPE_PEM, k).decode("utf-8"))
-
-    def checkCertPath(self):
-        exist = False
-        if (path.exists("certificate/cacert.pem") and path.exists("certificate/private.pem")):
-            exist = True
-        return exist
-
-def completer(text, state):
-    options = [i for i in PSH_FUNCTIONS if i.startswith(text)]
-    if state < len(options):
-        return options[state]
-    else:
-        return None
+def loadModules():
+    res = {}
+    # check subfolders
+    lst = listdir("modules")
+    dir = []
+    for d in lst:
+        s = path.abspath("modules") + sep + d
+        if path.isdir(s) == False:
+            dir.append(d.split(".")[0])
+    # load the modules
+    for d in dir:
+        res[d] = __import__("modules." + d, fromlist = ["*"])
+    return res
 
 def main():
 
@@ -266,11 +187,13 @@ def main():
         HOST = args.host
         PORT = args.port
         global AUTOCOMPLETE
+        global MODULES
         server = HTTPServer((HOST, PORT), myHandler)
         print(time.asctime(), 'Server UP - %s:%s' % (HOST, PORT))
+        MODULES = loadModules()
 
         if (args.ssl):
-            cert = Certificate()
+            cert = certificate.Certificate()
             if ((cert.checkCertPath() == False) or cert.checkCertificateExpiration()):
                 cert.genCertificate()
             server.socket = ssl.wrap_socket (server.socket, certfile='certificate/cacert.pem', keyfile='certificate/private.pem', server_side=True)
