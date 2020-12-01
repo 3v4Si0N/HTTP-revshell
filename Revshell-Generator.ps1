@@ -144,8 +144,8 @@ if($template -in 'Custom') {
 # IP to connect
 $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
 $Random = New-Object System.Random ; "Enter the IP of your server:` "-split '' | ForEach-Object{Write-Host $_ -nonew ; Start-Sleep -milliseconds $(1 + $Random.Next(25))}
-$Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_CursorTop() ; $readip = $Host.UI.ReadLine() ; if(!$readip) { [Console]::SetCursorPosition(0,"$cursortop")
-& $Question ; Write-Host "Enter the IP of your server:` " -ForegroundColor Gray -NoNewLine ; Write-Host $ip -ForegroundColor Green }
+$Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_CursorTop() ; $readip = $Host.UI.ReadLine() ; if($readip) { $ip = $readip }
+if(!$readip) { [Console]::SetCursorPosition(0,"$cursortop") ; & $Question ; Write-Host "Enter the IP of your server:` " -ForegroundColor Gray -NoNewLine ; Write-Host $ip -ForegroundColor Green }
 
 # Listening port
 $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
