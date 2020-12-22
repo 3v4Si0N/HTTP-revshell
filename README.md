@@ -6,7 +6,7 @@ HTTP-revshell is a tool focused on redteam exercises and pentesters. This tool p
 
 <p align="center"><img width=400 alt="HTTP-revshell" src="https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/master/images/logo.png"></p>
 
-## Help server.py (unisession server)
+## Help server.py
 Server usage:
 ```
 usage: server.py [-h] [--ssl] [--autocomplete] host port
@@ -37,17 +37,6 @@ cd HTTP-revshell/
 pip3 install -r requirements.txt
 ```
 
-## Quick start server-multisession.py (multisession server)
-
-```
-This server allows multiple connection of clients.
-There is a menu with three basic commands: sessions, interact and exit
-     - sessions --> show currently active sessions
-     - interact --> interacts with a session (Example: interact <session_id>)
-     - exit --> close the application
-```
-**IMPORTANT**: To change the session press *CTRL+d* to exit the current session without closing it.
-
 ## Features
  - SSL
  - Proxy Aware
@@ -56,8 +45,7 @@ There is a menu with three basic commands: sessions, interact and exit
  - Load powershell scripts through the server
  - Error Control
  - AMSI bypass
- - Multiple sessions [only server-multisession.py]
- - Autocomplete PowerShell functions (optional) [only server.py]
+ - Autocomplete PowerShell functions (optional)
     
 ## Extra functions usage
 ### Upload
