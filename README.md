@@ -48,6 +48,8 @@ There is a menu with three basic commands: sessions, interact and exit
 ```
 **IMPORTANT**: To change the session press *CTRL+d* to exit the current session without closing it.
 
+**IMPORTANT 2**: It's a BETA version, it's not prepared to use in a real Red Team environment.
+
 ## Features
  - SSL
  - Proxy Aware
