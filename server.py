@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 import globals, certificate, modulescontroller
+from Color import Color
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import base64, urllib.parse, time, readline, ssl, argparse, json
-from termcolor import colored
+import readline, base64, urllib.parse, time, ssl, argparse, json
 from os import listdir, sep, path
-
 
 class myHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -33,18 +32,18 @@ class myHandler(BaseHTTPRequestHandler):
                 with open(filename, mode='wb') as file: # b is importante -> binary
                     content = base64.b64decode(content)
                     file.write(content)
-                    print(colored(output, "green"))
+                    print(Color.F_green + output + Color.reset)
             except:
-                print (colored("\r\n[!] Error: Writing file!", "red"))
+                print (Color.F_red + "\r\n[!] Error: Writing file!" + Color.reset)
         else:
             if json_response["result"] != json_response["pwd"] and json_response["type"] != "4UT0C0MPL3T3":
-                self.printResult(result, color)
+                self.printResult(result, "F_" + color.capitalize())
 
         try:
             command = self.newCommand(pwd)
             self.sendCommand(command, html)
         except (AttributeError, BrokenPipeError) as e:
-            pass
+            print (e)
         return
 
     def parseResult(self):
@@ -72,10 +71,10 @@ class myHandler(BaseHTTPRequestHandler):
                 else:
                     result = urllib.parse.unquote(data["result"])
                     result = (base64.b64decode(data["result"])).decode('utf-8')
-            except:
+            except e:
                 pass
         else:
-            input(colored("[!] New Connection, please press ENTER!",'red'))
+            input(Color.F_Red + "[!] New Connection, please press ENTER!" + Color.reset)
 
 
         return result, parser_type, data, color
@@ -105,7 +104,7 @@ class myHandler(BaseHTTPRequestHandler):
         return pwd
 
     def printResult(self, result, color):
-        print(colored(result, color))
+        print(getattr(Color, color) + result + Color.reset)
 
     def isDownloadFunctCalled(self, json_response):
         iscalled = False
@@ -122,7 +121,7 @@ class myHandler(BaseHTTPRequestHandler):
             globals.AUTOCOMPLETE = False
         elif pwd != "":
             #readline.parse_and_bind("tab: complete")
-            command = input(colored("PS {}> ".format(pwd), "blue"))
+            command = input(Color.F_Blue + "PS {}> ".format(pwd) + Color.reset)
             if command == "":
                 command = "pwd | Format-Table -HideTableHeaders"
         else:
@@ -159,7 +158,7 @@ def main():
 ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝   ╚═╝    ╚══════╝    ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
                                                                                                          By: 3v4Si0N
     """
-    print (colored(banner, 'yellow'))
+    print (Color.F_Yellow + banner + Color.reset)
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('host', help='Listen Host', type=str)
     parser.add_argument('port', help='Listen Port', type=int)
