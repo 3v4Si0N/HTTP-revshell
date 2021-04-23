@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 import globals, certificate, modulescontroller
+from Color import Color
 from multisession_classes.menu import Menu
 from multisession_classes.readline_functions import Readline_functions
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import base64, urllib.parse, time, readline, ssl, argparse, json
-from termcolor import colored
 from pynput.keyboard import Key, Controller
 import signal
 
@@ -40,15 +40,14 @@ class myHandler(BaseHTTPRequestHandler):
                     with open(filename, mode='wb') as file: # b is importante -> binary
                         content = base64.b64decode(content)
                         file.write(content)
-                        print(colored(output, "green"))
+                        print(Color.F_Green + output + Color.reset)
                 except:
-                    print (colored("\r\n[!] Error: Writing file!", "red"))
+                    print (Color.F_Red + "\r\n[!] Error: Writing file!" + Color.reset)
             else:
                 if ((json_response["result"] != json_response["pwd"]) and 
                 ("InvokeWebRequestCommand" not in result) and
                 ("WebCmdletWebResponseException" not in result)):
-                    self.printResult(result, color)
-
+                    self.printResult(result, "F_" + color.capitalize())
             try:
                 if (parser_type == "newclient"):
                     command = self.newCommand(pwd, True)
@@ -99,7 +98,7 @@ class myHandler(BaseHTTPRequestHandler):
             except:
                 pass
         else:
-            input(colored("[!] New Connection from {}, please press ENTER!".format(client),'red'))
+            input(Color.F_Red + "[!] New Connection from {}, please press ENTER!".format(client) + Color.reset)
         
         return result, parser_type, client_id, data, color
 
@@ -128,7 +127,7 @@ class myHandler(BaseHTTPRequestHandler):
         return pwd
 
     def printResult(self, result, color):
-        print(colored(result, color))
+        print(getattr(Color, color) + result + Color.reset)
 
     def isDownloadFunctCalled(self, json_response):
         iscalled = False
@@ -144,7 +143,7 @@ class myHandler(BaseHTTPRequestHandler):
         try:
             if pwd != "":
                 if (not newclient) and (not reconnect):
-                    command = input(colored("PS {}> ".format(pwd), "blue"))
+                    command = input(Color.F_Blue + "PS {}> ".format(pwd) + Color.reset)
                 if command == "":
                     command = "pwd | Format-Table -HideTableHeaders"
             else:
@@ -165,8 +164,8 @@ class myHandler(BaseHTTPRequestHandler):
                 del globals.CLIENT_DICT[globals.CURRENT_CLIENT]
                 if len(globals.CLIENT_DICT) > 0:
                     globals.CURRENT_CLIENT = list(globals.CLIENT_DICT.keys())[0]
-                    print(colored("[*] Session has been closed", "green"))
-                    print(colored("[!] WARNING: Session been changed to {}!".format(globals.CURRENT_CLIENT), "yellow"))
+                    print(Color.F_Green + "[*] Session has been closed" + Color.reset)
+                    print(Color.F_Yellow + "[!] WARNING: Session been changed to {}!".format(globals.CURRENT_CLIENT) + Color.reset)
 
             CMD = base64.b64encode(command.encode())
             self.send_header('Authorization',CMD.decode('utf-8'))
@@ -187,7 +186,7 @@ if __name__ == "__main__":
 ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚═╝   ╚═╝    ╚══════╝    ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
                                                                                                          By: 3v4Si0N
     """
-    print (colored(banner, 'yellow'))
+    print (Color.F_Yellow + banner + Color.reset)
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('host', help='Listen Host', type=str)
     parser.add_argument('port', help='Listen Port', type=int)
@@ -216,7 +215,7 @@ if __name__ == "__main__":
             readline.set_completer(rf.completer)
             readline.parse_and_bind("tab: complete")
 
-            menu_command = input(colored("\nHTTP-revshell> ", "yellow")).split(" ")
+            menu_command = input(Color.F_Yellow + "\nHTTP-revshell> " + Color.reset).split(" ")
             menu.construct_menu(menu_command, server)
 
     except KeyboardInterrupt:
