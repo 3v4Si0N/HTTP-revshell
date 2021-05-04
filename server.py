@@ -71,7 +71,7 @@ class myHandler(BaseHTTPRequestHandler):
                 else:
                     result = urllib.parse.unquote(data["result"])
                     result = (base64.b64decode(data["result"])).decode('utf-8')
-            except e:
+            except:
                 pass
         else:
             input(Color.F_Red + "[!] New Connection, please press ENTER!" + Color.reset)
