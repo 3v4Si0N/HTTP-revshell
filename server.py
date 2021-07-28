@@ -32,7 +32,7 @@ class myHandler(BaseHTTPRequestHandler):
                 with open(filename, mode='wb') as file: # b is importante -> binary
                     content = base64.b64decode(content)
                     file.write(content)
-                    print(Color.F_green + output + Color.reset)
+                    print(Color.F_Green + output + Color.reset)
             except:
                 print (Color.F_Red + "\r\n[!] Error: Writing file!" + Color.reset)
         else:
