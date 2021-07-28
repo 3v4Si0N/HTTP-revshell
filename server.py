@@ -34,7 +34,7 @@ class myHandler(BaseHTTPRequestHandler):
                     file.write(content)
                     print(Color.F_green + output + Color.reset)
             except:
-                print (Color.F_red + "\r\n[!] Error: Writing file!" + Color.reset)
+                print (Color.F_Red + "\r\n[!] Error: Writing file!" + Color.reset)
         else:
             if json_response["result"] != json_response["pwd"] and json_response["type"] != "4UT0C0MPL3T3":
                 self.printResult(result, "F_" + color.capitalize())
