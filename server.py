@@ -159,7 +159,7 @@ def main():
                                                                                                          By: 3v4Si0N
     """
     print (Color.F_Yellow + banner + Color.reset)
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser = argparse.ArgumentParser(description='')
     parser.add_argument('host', help='Listen Host', type=str)
     parser.add_argument('port', help='Listen Port', type=int)
     parser.add_argument('--ssl', default=False, action="store_true", help='Send traffic over ssl')
