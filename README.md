@@ -11,8 +11,6 @@ Server usage:
 ```
 usage: server.py [-h] [--ssl] [--autocomplete] host port
 
-Process some integers.
-
 positional arguments:
   host            Listen Host
   port            Listen Port
