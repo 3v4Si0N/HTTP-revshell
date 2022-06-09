@@ -89,7 +89,7 @@ class myHandler(BaseHTTPRequestHandler):
         except KeyError:
             pass
 
-        return downloaded_file_path, file_content, output
+        return downloaded_file_path, file_content
 
     def getPwd(self, json_response):
         try:
