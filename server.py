@@ -12,8 +12,33 @@ class myHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.server_version = "Apache/2.4.18"
         self.sys_version = "(Ubuntu)"
-        self.send_response(200)
-        self.wfile.write("<html><body><h1>It Works!</h1></body></html>".encode())
+        itworks_message = "<html><body><h1>It works!</h1></body></html>"
+
+        print("{} - GET {}".format(self.client_address[0], self.path))
+        files = [f for f in listdir('.') if path.isfile(f)] # Get files in current directory
+        path_file = self.path[1:] # Remove the first "/" in self.path
+        
+        if path_file:
+            if path_file in files:
+                with open(path_file, "r") as f:
+                    file_data = f.read()
+                    self.send_response(200)
+                    self.send_header("Content-type", "text/plain")
+                    self.send_header("Content-Length", path.getsize(path_file))
+                    self.end_headers()
+                    self.wfile.write(file_data.encode())
+            else:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html")
+                self.send_header("Content-Length", len(itworks_message))
+                self.end_headers()
+                self.wfile.write(itworks_message.encode())
+        else:
+            self.send_response(200)
+            self.send_header("Content-type", "text/html") # Add HTML Content type to be processed by the browser
+            self.send_header("Content-Length", len(itworks_message))
+            self.end_headers()
+            self.wfile.write(itworks_message.encode())
         return
 
     def do_POST(self):
