@@ -14,7 +14,6 @@ class myHandler(BaseHTTPRequestHandler):
         self.sys_version = "(Ubuntu)"
         itworks_message = "<html><body><h1>It works!</h1></body></html>"
 
-        print("{} - GET {}".format(self.client_address[0], self.path))
         files = [f for f in listdir('.') if path.isfile(f)] # Get files in current directory
         path_file = self.path[1:] # Remove the first "/" in self.path
         
